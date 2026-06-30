@@ -1,0 +1,2329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portrait Prompt Lab — Men Lite（無料お試し版）</title>
+<style>
+:root{
+  --primary:#ff4785; --primary-d:#e63971; --primary-soft:#fff0f5;
+  --bg:#ffffff; --ink:#2b2b2f; --muted:#7a7a82;
+  --line:#e7e7ec; --tag-bg:#f6f7f9; --card:#ffffff;
+  --ok:#28a745; --advbg:#fafbfc; --glow:rgba(255,71,133,.3); --glow-soft:rgba(255,71,133,.10);
+}
+*{box-sizing:border-box}
+body{font-family:'Helvetica Neue',Arial,'Hiragino Kaku Gothic ProN','Hiragino Sans',Meiryo,sans-serif;
+  background:var(--bg);color:var(--ink);line-height:1.6;margin:0;padding:20px 16px 90px;}
+.container{max-width:880px;margin:0 auto;}
+h1{font-size:22px;margin:0 0 4px;}
+.lead{color:var(--muted);font-size:13px;margin:0 0 16px;border-bottom:2px solid var(--primary);padding-bottom:14px;}
+.lead b{color:var(--primary-d);}
+.block-title{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin:22px 0 8px;text-transform:uppercase;}
+.guide{font-size:12px;color:var(--muted);background:#f7f8fa;border-radius:8px;padding:9px 12px;margin:0 0 10px;}
+.guide b{color:var(--primary-d);}
+
+.model-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
+.model-grid .grp-label{grid-column:1/-1;font-size:11px;font-weight:700;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;}
+.model-grid .grp-label:first-child{border-top:none;margin-top:0;}
+.mbtn{border:2px solid var(--line);border-radius:10px;background:#fff;padding:9px 8px;cursor:pointer;text-align:center;transition:.15s;position:relative;}
+.mbtn:hover{border-color:#ffc1d6;}
+.mbtn.active{border-color:var(--primary);background:var(--primary-soft);}
+.mbtn .mn{font-weight:700;font-size:13.5px;display:block;line-height:1.25;}
+.mbtn .ms{font-size:10px;color:var(--muted);display:block;margin-top:2px;}
+.mbtn .mfam{position:absolute;top:5px;right:6px;font-size:8.5px;font-weight:700;color:#c9c9d0;letter-spacing:.03em;}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chips input{display:none;}
+.chips label{padding:8px 14px;border:2px solid var(--line);border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s;}
+.chips input:checked+label{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-d);}
+
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:8px;}
+.btn{padding:11px;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:13px;transition:.15s;display:flex;align-items:center;justify-content:center;gap:4px;}
+.btn-preset{background:#ffe6ee;color:#d6336c;border:1px solid #ffb3c6;}
+.btn-preset:hover{background:#ffd0df;}
+.btn-ghost{background:#f1f3f5;color:#495057;border:1px solid #ced4da;}
+.btn-ghost:hover{background:#e9ecef;}
+
+details{border:1px solid var(--line);border-radius:10px;margin-bottom:8px;background:var(--card);}
+summary{padding:13px 14px;font-weight:700;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;background:#fbfbfc;border-radius:10px;font-size:14px;gap:8px;}
+summary::-webkit-details-marker{display:none;}
+.sum-right{display:flex;align-items:center;gap:10px;}
+.lockbtn{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 7px;cursor:pointer;color:#bbb;line-height:1.4;}
+.lockbtn.on{color:var(--primary);border-color:var(--primary);background:var(--primary-soft);}
+.caret{font-size:11px;color:#aaa;}
+details[open]>summary .caret{transform:rotate(180deg);}
+details[open]>summary{border-bottom:1px solid var(--line);border-radius:10px 10px 0 0;}
+.tag-wrap{padding:13px;display:flex;flex-wrap:wrap;gap:9px;}
+.tag-input{display:none;}
+.tag-label{display:inline-block;padding:7px 13px;background:var(--tag-bg);border:1px solid var(--line);border-radius:18px;cursor:pointer;font-size:13px;user-select:none;transition:.15s;}
+.tag-input:checked+.tag-label{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 6px var(--glow);}
+.cat-note{font-size:11px;color:var(--muted);font-weight:400;margin-left:6px;}
+
+.adv-shell{border:1px dashed #d8d8e0;border-radius:10px;padding:4px 12px 12px;background:var(--advbg);margin-bottom:8px;}
+.adv-shell>summary{background:transparent;border:none;padding:13px 2px;}
+.grp{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;background:#fff;}
+.grp>summary.grp-sum{font-weight:800;font-size:14px;background:#fbfbfc;border-radius:12px;padding:14px;}
+.grp[open]>summary.grp-sum{background:#fdeff5;color:#b3215f;border-bottom:1px solid var(--line);border-radius:12px 12px 0 0;}
+.grp-body{padding:12px 12px 2px;}
+.grp-body>details{margin-bottom:8px;}
+.grp-body>details:last-child{margin-bottom:4px;}
+.field{margin:12px 0;}
+.field label.flbl{display:block;font-size:13px;font-weight:700;margin-bottom:6px;}
+.slider-row{display:flex;align-items:center;gap:10px;}
+input[type=range]{flex:1;accent-color:var(--primary);}
+.val{font-size:12px;color:var(--muted);min-width:48px;text-align:right;font-variant-numeric:tabular-nums;}
+.toggle-row{display:flex;flex-wrap:wrap;gap:8px;}
+.toggle{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--line);border-radius:8px;font-size:13px;cursor:pointer;background:#fff;}
+.toggle input{accent-color:var(--primary);}
+.toggle.on{border-color:var(--primary);background:var(--primary-soft);}
+input[type=text],textarea,select{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;font-family:inherit;font-size:13px;background:#fff;color:var(--ink);}
+select{cursor:pointer;}
+textarea{resize:vertical;line-height:1.5;}
+.seg{display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;}
+.seg button{flex:1;border:none;background:#fff;padding:9px 4px;font-size:12.5px;font-weight:600;cursor:pointer;color:#666;border-right:1px solid var(--line);}
+.seg button:last-child{border-right:none;}
+.seg button.on{background:var(--primary);color:#fff;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+@media(max-width:560px){.grid2,.grid3{grid-template-columns:1fr;}}
+.hint{font-size:11px;color:var(--muted);margin-top:4px;}
+
+.out-card{border:2px solid var(--primary);border-radius:12px;padding:16px;margin-top:14px;background:#fff;box-shadow:0 6px 18px var(--glow-soft);}
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.out-head .mname{font-weight:800;font-size:16px;}
+.out-head .mname small{color:var(--muted);font-weight:600;font-size:11px;margin-left:6px;}
+.out-label{font-size:11px;font-weight:700;color:var(--muted);margin:12px 0 5px;display:flex;justify-content:space-between;align-items:center;}
+.copy-mini{font-size:11px;border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 9px;cursor:pointer;color:var(--primary-d);font-weight:700;}
+.copy-mini:hover{background:var(--primary-soft);}
+.out-area{width:100%;min-height:104px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#fafafa;font-size:13px;line-height:1.55;resize:vertical;color:#333;}
+.neg-area{min-height:62px;}
+.meta{font-size:12px;color:var(--muted);margin-top:10px;padding:10px;background:var(--primary-soft);border-radius:8px;}
+.meta b{color:var(--primary-d);}
+.btn-copy{display:block;width:100%;padding:15px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:800;cursor:pointer;margin-top:14px;box-shadow:0 4px 12px var(--glow);}
+.btn-copy:hover{background:var(--primary-d);}
+.btn-all{display:block;width:100%;padding:12px;background:#fff;color:var(--primary-d);border:2px solid var(--primary);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;}
+.btn-all:hover{background:var(--primary-soft);}
+.tipbox{font-size:12px;color:#555;background:#f6f7f9;border-left:3px solid var(--primary);border-radius:0 6px 6px 0;padding:9px 12px;margin-top:10px;}
+.foot{font-size:11px;color:#b3b3bb;text-align:center;margin-top:24px;line-height:1.7;}
+.qlink{cursor:pointer;color:var(--primary);font-weight:600;margin-right:8px;white-space:nowrap;text-decoration:none;border-bottom:1px dashed var(--primary);}
+.qlink:hover{opacity:.75;}
+.btn-sm{font-size:12px;padding:5px 9px;border-radius:7px;}
+
+/* selected summary chips */
+.selsum{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;}
+.selsum:empty{display:none;}
+.selchip{font-size:12px;padding:4px 9px;border-radius:14px;border:1px solid var(--primary);background:var(--primary-soft);color:var(--primary-d);cursor:pointer;font-weight:600;line-height:1.3;}
+.selchip b{margin-left:3px;}
+.selchip:hover{background:var(--primary);color:#fff;}
+
+/* dark mode */
+body.dark{--bg:#15151a;--ink:#e9e9ef;--muted:#9a9aa6;--line:#34343f;--tag-bg:#23232b;--card:#1d1d24;--primary-soft:#2a1a22;--advbg:#1a1a20;}
+body.dark .guide,body.dark .tipbox{background:#20202a;color:#b8b8c2;}
+body.dark summary,body.dark .grp,body.dark .grp>summary.grp-sum,body.dark .mbtn,body.dark .toggle,body.dark input[type=text],body.dark textarea,body.dark select,body.dark .out-card,body.dark .copy-mini,body.dark .lockbtn,body.dark .btn-all{background:#1d1d24;color:var(--ink);}
+body.dark .seg button{background:#1d1d24;color:#aaa;}
+body.dark .seg button.on{background:var(--primary);color:#fff;}
+body.dark .out-area{background:#141419;color:#d8d8e0;}
+body.dark .grp[open]>summary.grp-sum{background:#2a1622;color:#ff9ec2;}
+body.dark .btn-ghost{background:#26262e;color:#cfcfd8;border-color:#3a3a44;}
+body.dark .btn-preset{background:#3a1c28;color:#ff9ec2;border-color:#5a2a3c;}
+body.dark .tag-label{background:var(--tag-bg);color:#d0d0d8;}
+body.dark .foot{color:#6a6a74;}
+body.dark .selchip{background:#2a1a22;color:#ff9ec2;}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 id="appTitle">✨ Portrait Prompt <span style="color:var(--primary)">Lab</span></h1>
+  <p class="lead" id="appLead"><b>Women Edition ― AIポートレート用 プロンプト工房・女性版</b><br>1回の選択で、主要<b>18モデル</b>に最適化したプロンプトを自動生成。モデルごとに最新のクオリティタグ・ネガティブ・推奨設定を自動で組み立てます。<b>全年齢（SFW）専用</b>。</p>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin:-4px 0 8px;flex-wrap:wrap">
+    <button class="btn btn-ghost btn-sm" id="btnDark" onclick="toggleDark()">🌙 ダーク</button>
+    <button class="btn btn-ghost btn-sm" onclick="var h=document.getElementById('helpWrap');h.open=true;h.scrollIntoView({behavior:'smooth'});">❓ 使い方・FAQ</button>
+  </div>
+
+  <details class="adv-shell" id="helpWrap" style="margin-bottom:12px">
+    <summary>❓ クイックスタート & よくある質問<span class="caret">▼</span></summary>
+    <div style="padding:10px 4px 2px;line-height:1.8">
+      <b>かんたん3ステップ</b><br>
+      ① 上の「①」で出力先モデルを選ぶ（迷ったら GPT Image 2）。<br>
+      ② 「④ 要素を選ぶ」で被写体・服・髪などをタップ。プリセットやテーマ別ガチャから始めると速いです。<br>
+      ③ 下の「PROMPT」をコピーして、各画像生成サービスに貼り付け。<br>
+      <div style="height:8px"></div>
+      <b>Q. 複数人がうまく出ない／腕が増える</b><br>
+      A. 「👥 人数・構成」で人数を指定すると、人数固定タグと崩れ防止ネガティブが入ります。それでも崩れる時は、人数を減らす／「関係性・絡み」で配置を指定／Pony系・NovelAI・Midjourney・Nano Banana・GPT Image を使う、が有効。確実に揃えたい時は1人ずつ生成して合成、または参照画像方式が堅実です。<br>
+      <div style="height:6px"></div>
+      <b>Q. 同じ人物で別ポーズを作りたい</b><br>
+      A. 「🔁 連作モード」をオン。さらに SD/MJ は Seed を固定、MJ は --cref（キャラ参照）、Nano Banana/GPT Image は生成画像を参照画像として渡す、「キャラクター固定」で髪・目・特徴を文章固定、を併用すると安定します。<br>
+      <div style="height:6px"></div>
+      <b>Q. モデルの選び方</b><br>
+      A. 手軽さ→GPT Image 2／実写の質→FLUX・Imagen／アニメ→NovelAI・Illustrious／芸術性→Midjourney。<br>
+      <div style="height:6px"></div>
+      <b>Q. 設定を別の端末でも使いたい</b><br>
+      A. 「🔗 設定コード」で書き出した文字列を、別端末で貼り付けて読み込めば復元できます。<br>
+      <div style="height:6px"></div>
+      <b>注意</b>：本ツールは全年齢（SFW）専用です。出力プロンプトは各サービスの利用規約に従ってご利用ください。
+    </div>
+  </details>
+
+  <div class="block-title">① 出力先モデル</div>
+  <div class="guide" id="modelGuide">迷ったら：手軽さ→<b>GPT Image 2</b>／実写の質→<b>FLUX.2</b>・<b>Imagen 4</b>／アニメ→<b>NovelAI V4.5</b>・<b>Illustrious</b>／芸術性→<b>Midjourney</b>。</div>
+  <div class="model-grid" id="modelGrid"></div>
+
+  <div class="block-title">② 画風・サイズ・言語</div>
+  <div style="margin-bottom:10px"><div class="chips" id="mediumChips"></div></div>
+  <div style="margin-bottom:10px"><div class="chips" id="aspectChips"></div>
+    <div class="hint" style="margin:6px 0 0">用途でワンタップ：
+      <a class="qlink" onclick="quickAspect('1:1')">SNSアイコン(1:1)</a>
+      <a class="qlink" onclick="quickAspect('4:5')">投稿(4:5)</a>
+      <a class="qlink" onclick="quickAspect('16:9')">サムネ(16:9)</a>
+      <a class="qlink" onclick="quickAspect('9:16')">ストーリー/壁紙(9:16)</a>
+      <a class="qlink" onclick="quickAspect('2:3')">ポスター(2:3)</a>
+    </div>
+  </div>
+  <div class="chips" id="langChips" title="自然文系モデルの出力言語"></div>
+  <div style="margin-top:10px">
+    <label class="flbl" style="display:block;margin-bottom:4px">👥 人数・構成</label>
+    <div class="seg" id="peopleSeg"></div>
+    <div class="hint">「二人／三人／集団」を選ぶと、被写体（④で選んだ人物）をその人数に展開し、<b>人数を強く固定するタグ＋体の融合・余分な手足を防ぐ専用ネガティブ</b>を自動付与します。「カップル」は男女ペア。複数人は単一モデルでも崩れやすいため、<b>SDはPony系・NAI、MJ／Nano Banana／GPT Imageが比較的安定</b>。崩れる場合は人数を減らすか、関係性（④）で配置を指定してください。</div>
+    <div class="field" style="margin-top:8px"><label class="flbl">2人目／相手の指定（任意・複数人時）</label><input type="text" id="person2" placeholder="例：男性は紺のスーツ／もう一人は黒髪ショート" oninput="render()"><div class="hint">複数人・カップルのとき、相手側の服装や髪などを補足できます（自然文・タグ・MJに反映）。<b>カップルでは服装・髪は女性側に適用</b>され、男性側はここで指定すると破綻しにくくなります。</div></div>
+  </div>
+  <div style="margin-top:10px"><div style="font-size:12px;color:var(--muted);margin-bottom:5px">自然文の形式（GPT Image 2・Imagen・Nano Banana 等）</div><div class="seg" id="styleSeg"></div><div class="hint">「構造化」は見出し付き（主題／人物／服装／背景・光／構図／質感／避けたい要素）で出力します。</div></div>
+
+  <div style="margin-top:10px">
+    <label class="toggle" id="sheetOnWrap" style="width:100%;justify-content:center;font-weight:700"><input type="checkbox" id="sheetOn" onchange="render()"> 📋 キャラクターシート出力（複数アングルの設定資料）</label>
+    <div class="hint">同一人物を正面・側面・背面・斜めで一枚に。<b>指示追従型(GPT Image 2 / Imagen / Nano Banana)とMidjourney推奨</b>。タグ系は配置精度が落ちます。ONの間はポーズ・背景・構図の選択より優先されます。</div>
+    <div class="toggle-row" id="sheetDetails" style="margin-top:8px"></div>
+  </div>
+
+  <div style="margin-top:10px">
+    <label class="toggle" id="hiresWrap" style="width:100%;justify-content:center"><input type="checkbox" id="hires" onchange="render()"> 🔍 高画質・高解像度（8K）を強調</label>
+    <div class="hint">プロンプト側で解像度・精細さを強く指示します。<b>実際の画像の拡大</b>は各モデルのアップスケールで：SDは<b>Hires.fix</b>、Midjourneyは<b>Upscale</b>、GPT/Imagenは高解像度指定。</div>
+  </div>
+
+  <div style="margin-top:10px">
+    <label class="flbl" style="display:block;margin-bottom:4px">表情・ポーズの強度</label>
+    <div class="seg" id="intSeg"></div>
+    <div class="hint">「控えめ」=自然で抑えめ／「強め」=大げさで生き生きとした表情・ポーズに。</div>
+  </div>
+
+  <div style="margin-top:10px">
+    <label class="toggle" id="seriesWrap" style="width:100%;justify-content:center"><input type="checkbox" id="seriesOn" onchange="render()"> 🔁 連作モード（同一人物で別ポーズ）</label>
+    <div class="hint">前の画像と<b>同一人物</b>を保つ指示を全出力に追加。ポーズ／表情／背景だけ変えて再生成してください。確実に揃えるコツ：<b>SD・MJはSeedを固定</b>、<b>Nano Banana・GPT Image・MJは生成画像を参照画像（MJは下の --cref）に指定</b>。さらに「キャラクター固定」（⑤）で髪・目・特徴を文章固定すると安定します。</div>
+  </div>
+
+  <div class="block-title">③ プリセット & 操作</div>
+  <div class="actions" id="presetRow"></div>
+  <div class="actions" style="margin-top:8px">
+    <button class="btn btn-ghost" onclick="randomize()">🎲 おまかせ（🔒は固定）</button>
+    <button class="btn btn-ghost" id="btnUndo" onclick="undo()">↩ 元に戻す</button>
+    <button class="btn btn-ghost" onclick="clearAll()">🗑 リセット</button>
+    <button class="btn btn-ghost" onclick="openSettings()">💾 設定の保存/読込</button>
+  </div>
+  <div class="hint" style="margin:10px 0 4px">🎲 テーマ別ガチャ（このパックの全テーマから選んで生成。「ショットだけ」は人物を固定したまま構図・表情・背景だけ変更）：</div>
+  <div class="actions" id="themeGacha" style="flex-wrap:wrap;gap:6px"></div>
+  <details class="adv-shell" style="margin-top:8px">
+    <summary>🔗 設定コードの書き出し／読み込み（端末間で共有）<span class="caret">▼</span></summary>
+    <div style="padding:8px 2px 2px">
+      <div class="actions" style="gap:6px"><button class="btn btn-ghost btn-sm" id="btnExport" onclick="exportCode()">⬆ 書き出してコピー</button><button class="btn btn-ghost btn-sm" id="btnImport" onclick="importCode()">⬇ 貼り付けて読み込み</button></div>
+      <textarea class="out-area" id="codeBox" placeholder="ここにコードが表示されます。別端末ではここに貼り付けて『読み込み』。" style="min-height:80px;margin-top:6px"></textarea>
+      <div class="hint">設定一式を短い文字列で保存・復元。メモやSNSに貼って共有もできます。</div>
+    </div>
+  </details>
+
+  <details class="adv-shell" id="varWrap" style="margin-top:8px">
+    <summary>🎲 バリエーション一括生成（4案）<span class="caret">▼</span></summary>
+    <div style="padding:8px 2px 2px">
+      <button class="btn" style="width:100%" onclick="genVariations()">現在の設定で、ポーズ・表情・構図・光だけ変えた4案を生成</button>
+      <div class="hint" style="margin:6px 0">人物・服装・国籍は固定したまま、ショット要素のみ振った候補を一度に出力します。固定したい項目は各項目の🔒で除外できます（現在の出力モデルの形式で生成）。</div>
+      <textarea class="out-area" id="varOut" readonly placeholder="ここに4案が出力されます。" style="min-height:170px"></textarea>
+    </div>
+  </details>
+
+  <div class="block-title">④ 要素を選ぶ</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin:-2px 0 6px;flex-wrap:wrap">
+    <div class="hint" style="margin:0">グループ見出しをタップで開閉。<span id="selCount" style="color:var(--primary);font-weight:700"></span></div>
+    <div style="display:flex;gap:6px"><button class="btn btn-ghost btn-sm" onclick="setAllGroups(true)">全部開く</button><button class="btn btn-ghost btn-sm" onclick="setAllGroups(false)">全部閉じる</button></div>
+  </div>
+  <div id="selSummary" class="selsum"></div>
+  <div id="catGroups"></div>
+
+  <details class="adv-shell">
+    <summary>🎛 出力パラメータ（品質・ネガティブ・Seed）<span class="caret">▼</span></summary>
+    <div class="field">
+      <label class="flbl">品質強調（タグ系の高精細タグ量）</label>
+      <div class="seg" id="qSeg"></div>
+      <div class="hint">最大はSDXL/SD1.5で強調構文を付与。最近のIllustrious/Pony系は付けすぎない方が綺麗です。</div>
+    </div>
+    <div class="field">
+      <label class="flbl">描写の細かさ（自然文・MJの密度）</label>
+      <div class="seg" id="proseSeg"></div>
+    </div>
+    <div class="field">
+      <label class="flbl">ネガティブの強さ（タグ系）</label>
+      <div class="seg" id="negSeg"></div>
+    </div>
+    <div class="field">
+      <label class="flbl">手・指・顔の品質補正</label>
+      <div class="toggle-row" id="fixToggles"></div>
+      <div class="hint">タグ系はネガティブ強化＋補強タグ、自然文系は文章で指示、Midjourneyは --no に反映します。</div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="flbl">Seed（任意）</label><input type="text" id="seed" placeholder="例：1234567" oninput="render()"><div class="hint">同じ構図の再現に。MJは --seed、SDは固定Seed。</div></div>
+      <div class="field"><label class="flbl">追加ポジティブ（任意）</label><input type="text" id="customPos" placeholder="例：holding a bouquet" oninput="render()"><div class="hint">全モデルの末尾に追記。</div></div>
+    </div>
+    <div class="field"><label class="flbl">追加ネガティブ（任意）</label><input type="text" id="customNeg" placeholder="例：glasses, hat" oninput="render()"><div class="hint">タグ系/MJのネガティブに追記。よく使う除外をワンタップ：</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:5px">
+        <button class="btn btn-ghost btn-sm" onclick="setNegPreset('extra fingers, bad hands, fused fingers, missing fingers, mutated hands')">手指の崩れ</button>
+        <button class="btn btn-ghost btn-sm" onclick="setNegPreset('cluttered background, busy background, extra people, text, watermark')">背景すっきり</button>
+        <button class="btn btn-ghost btn-sm" onclick="setNegPreset('skin blemishes, harsh shadows, asymmetrical eyes, deformed face')">美肌・整顔</button>
+        <button class="btn btn-ghost btn-sm" onclick="setNegPreset('extra limbs, extra arms, extra legs, malformed limbs')">余分な手足</button>
+        <button class="btn btn-ghost btn-sm" onclick="setNegPreset('jpeg artifacts, lowres, blurry, low quality, worst quality')">低品質除去</button>
+      </div>
+    </div>
+  </details>
+
+  <details class="adv-shell">
+    <summary>🪞 実在感・AI感除去（実写向け）<span class="caret">▼</span></summary>
+    <div class="hint" style="margin:8px 0">実写の"AI顔"を抑え、実在感を高めます（自動美化の禁止・自然な左右非対称・素肌感）。</div>
+    <div class="toggle-row" id="realToggles"></div>
+    <div class="grid3" style="margin-top:12px">
+      <div class="field"><label class="flbl">絞り f値</label><input type="text" id="pdAperture" placeholder="f/2.2" oninput="render()"></div>
+      <div class="field"><label class="flbl">ISO</label><input type="text" id="pdISO" placeholder="200" oninput="render()"></div>
+      <div class="field"><label class="flbl">シャッター速度</label><input type="text" id="pdShutter" placeholder="1/250" oninput="render()"></div>
+    </div>
+    <div class="hint">撮影数値は写真らしさを補強します（自然文・タグ・MJに反映）。</div>
+  </details>
+
+  <details class="adv-shell" id="mjShell">
+    <summary>🛸 Midjourney 詳細パラメータ<span class="caret">▼</span></summary>
+    <div class="hint" style="margin:8px 0">Midjourney / niji を選択中のみ反映されます。</div>
+    <div class="field">
+      <div class="slider-row"><span style="font-size:12px;width:74px">Stylize</span><input type="range" id="mjS" min="0" max="1000" step="25" value="150" oninput="render()"><span class="val" id="mjSv">150</span></div>
+      <div class="slider-row"><span style="font-size:12px;width:74px">Chaos</span><input type="range" id="mjC" min="0" max="100" step="5" value="0" oninput="render()"><span class="val" id="mjCv">0</span></div>
+      <div class="slider-row"><span style="font-size:12px;width:74px">Weird</span><input type="range" id="mjW" min="0" max="3000" step="50" value="0" oninput="render()"><span class="val" id="mjWv">0</span></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label class="flbl">Quality (--q)</label>
+        <select id="mjQ" onchange="render()"><option value="">指定なし</option><option value=".25">.25（軽量）</option><option value=".5">.5</option><option value="1" selected>1（標準）</option></select></div>
+      <div class="field"><label class="flbl">スタイル参照 --sref（URL/番号）</label><input type="text" id="mjSref" placeholder="例：https://... または 123456" oninput="render()"></div>
+      <div class="field"><label class="flbl">キャラ参照 --cref（URL／同一人物の維持）</label><input type="text" id="mjCref" placeholder="例：https://...（前の生成画像URL）" oninput="render()"><div class="hint">前の生成画像のURLを入れると、同じ人物のまま別ポーズを作れます（--cw 100 付与）。</div></div>
+    </div>
+    <div class="toggle-row" style="margin-top:6px">
+      <label class="toggle" id="mjRawWrap"><input type="checkbox" id="mjRaw" onchange="render()"> --style raw（写実寄り）</label>
+      <label class="toggle" id="mjTileWrap"><input type="checkbox" id="mjTile" onchange="render()"> --tile（タイル）</label>
+    </div>
+  </details>
+
+  <details class="adv-shell">
+    <summary>🔧 うまくいかない時（トラブル対処）<span class="caret">▼</span></summary>
+    <div class="hint" style="margin:8px 0">症状を選ぶと、補正がプロンプトに自動で組み込まれます（上の品質補正と連動）。</div>
+    <div class="toggle-row" id="troubleChips"></div>
+  </details>
+
+  <details class="adv-shell">
+    <summary>👤 キャラクター固定（一貫性）<span class="caret">▼</span></summary>
+    <div class="hint" style="margin:8px 0">同じ人物で衣装やシーンだけ変えたい時に。容姿の核を固定します。</div>
+    <label class="toggle" id="lockOnWrap" style="margin-bottom:10px"><input type="checkbox" id="lockOn" onchange="render()"> 固定を有効にする</label>
+    <div class="grid2">
+      <div class="field"><label class="flbl">キャラ名/タグ</label><input type="text" id="lkName" placeholder="例：Mia / my_oc" oninput="render()"></div>
+      <div class="field"><label class="flbl">瞳の色</label><input type="text" id="lkEyes" placeholder="例：green eyes" oninput="render()"></div>
+      <div class="field"><label class="flbl">髪（色・型）</label><input type="text" id="lkHair" placeholder="例：long silver hair" oninput="render()"></div>
+      <div class="field"><label class="flbl">体型</label><input type="text" id="lkBody" placeholder="例：slender" oninput="render()"></div>
+    </div>
+    <div class="field"><label class="flbl">特徴（ほくろ・タトゥー等）</label><input type="text" id="lkFeat" placeholder="例：beauty mark under left eye" oninput="render()"></div>
+    <div class="tipbox" id="lockTip"></div>
+  </details>
+
+  <details class="adv-shell">
+    <summary>🅴 強調（重み付け・タグ系）<span class="caret">▼</span></summary>
+    <div class="hint" style="margin:8px 0">選択中の要素をタップすると ×1.1→×1.2→×1.3 と強調できます（タグ系に反映：A1111は (tag:1.2)、NovelAIは { }）。</div>
+    <div class="toggle-row" id="emphList"></div>
+  </details>
+
+  <details class="adv-shell">
+    <summary>⭐ お気に入り・履歴<span class="caret">▼</span></summary>
+    <div class="hint" id="storeNote" style="margin:8px 0"></div>
+    <button class="btn btn-ghost" onclick="saveFav()">＋ 現在の設定をお気に入り保存</button>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 4px">お気に入り</div>
+    <div id="favList"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);margin:12px 0 4px">最近のコピー履歴</div>
+    <div id="histList"></div>
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="clearHistory()">履歴を消去</button>
+  </details>
+
+  <div class="block-title">⑤ プロ仕上げ・自由入力</div>
+  <div class="grid2">
+    <div class="field"><label class="flbl">主題・一言（任意）</label><input type="text" id="pdTheme" placeholder="例：障子越しの白い余熱 / 夏の海風" oninput="render()"><div class="hint">写真のテーマを短く。先頭に反映。</div></div>
+    <div class="field"><label class="flbl">光の方向・質（任意）</label><input type="text" id="pdLight" placeholder="例：左前方からの逆光、トップライト" oninput="render()"><div class="hint">具体的な光で立体感が出ます。</div></div>
+  </div>
+  <div class="field"><label class="flbl">素材・質感（任意）</label><input type="text" id="pdMaterial" placeholder="例：リネンの織り、肌の毛穴、障子の拡散光" oninput="render()"><div class="hint">質感の描写でエディトリアル級に近づきます。</div></div>
+  <div class="field"><label class="flbl">自由入力</label><input type="text" id="freeText" placeholder="例：右手にコーヒーカップ、雨の日" oninput="render()"></div>
+
+  <div class="out-card">
+    <div class="out-head"><div class="mname" id="outModelName">—</div></div>
+    <div class="out-label">PROMPT <button class="copy-mini" onclick="copyField('outPos')">コピー</button></div>
+    <textarea class="out-area" id="outPos" readonly></textarea>
+    <div id="negWrap">
+      <div class="out-label">NEGATIVE / Undesired Content <button class="copy-mini" onclick="copyField('outNeg')">コピー</button></div>
+      <textarea class="out-area neg-area" id="outNeg" readonly></textarea>
+    </div>
+    <div class="meta" id="outMeta"></div>
+    <div class="meta" id="lenMeta" style="margin-top:4px;color:var(--muted)"></div>
+    <div class="tipbox" id="outTip"></div>
+    <button class="btn-copy" id="mainCopy" onclick="copyField('outPos')">プロンプトをコピー</button>
+    <button class="btn-all" onclick="copyAll()">📋 全18モデル形式をまとめてコピー</button>
+    <div class="actions" style="margin-top:8px">
+      <button class="btn btn-ghost" id="btnA1111" onclick="copyA1111()">📐 A1111一括コピー</button>
+      <button class="btn btn-ghost" id="btnJSON" onclick="copyJSON()">{ } JSONでコピー</button>
+    </div>
+  </div>
+
+  <details class="adv-shell" style="margin-top:18px">
+    <summary>📝 バージョン情報・更新履歴<span class="caret">▼</span></summary>
+    <div style="font-size:12px;color:#666;padding:8px 2px">
+      <p style="margin:4px 0" id="appVer"><b>v1.0</b>（最終更新 2026-06）</p>
+      <p style="margin:4px 0;color:#999">※ 流出版・再配布版はこの版で固定されます。最新モデルへの追従は正規版の更新でのみ提供されます。</p>
+    </div>
+  </details>
+  <div class="foot" id="appFoot">Portrait Prompt Lab — Women（女性版） ・ SFW専用</div>
+</div>
+
+<script>
+/* PACK (LITE) */
+/* Portrait Prompt Lab — Subject Pack: MEN LITE (無料お試し版) */
+const PACK = {
+ "id": "male_lite",
+ "meta": {
+  "docTitle": "Portrait Prompt Lab — Men Lite（無料お試し版）",
+  "h1": "✨ Portrait Prompt <span style=\"color:var(--primary)\">Lab</span>",
+  "lead": "<b>Men Edition ／ 無料お試し版（Lite）</b><br>選ぶだけで主要18モデル用プロンプトを自動生成。これは<b>カテゴリを絞った無料版</b>です。<br>▶ <b>全25カテゴリ・全テーマ・アプリ化(PWA)・Undo</b>入りのフル版は <u>プロフィールの固定ポスト</u> へ。全年齢(SFW)専用。",
+  "guide": "迷ったら：手軽さ→<b>GPT Image 2</b>／実写の質→<b>FLUX.2</b>・<b>Imagen 4</b>／アニメ→<b>NovelAI V4.5</b>・<b>Illustrious</b>／芸術性→<b>Midjourney</b>。",
+  "foot": "Portrait Prompt Lab — Men Lite（無料お試し版）<br>フル版（全機能）は プロフィールの固定ポスト ／ 全年齢(SFW)専用。",
+  "ver": "Lite v1.0 — 無料お試し版（フル版は全25カテゴリ・全テーマ・PWA・Undo対応）",
+  "version": "lite-1.0",
+  "updated": "2026-06",
+  "accent": {
+   "p": "#2e7df6",
+   "d": "#1f63d6",
+   "s": "#eaf2ff",
+   "glow": "rgba(46,125,246,.32)",
+   "glowSoft": "rgba(46,125,246,.12)"
+  }
+ },
+ "defaults": {
+  "model": "flux",
+  "medium": "m_photo",
+  "aspect": "4:5",
+  "lang": "en"
+ },
+ "media": null,
+ "phrasing": {
+  "person": true
+ },
+ "groups": [
+  {
+   "title": "🎯 系統・被写体・国籍",
+   "open": true,
+   "cats": [
+    "style",
+    "subject",
+    "ethnicity"
+   ]
+  },
+  {
+   "title": "💇 髪・服装",
+   "open": true,
+   "cats": [
+    "length",
+    "outfit"
+   ]
+  },
+  {
+   "title": "😊 表情・ポーズ",
+   "open": true,
+   "cats": [
+    "expr",
+    "pose"
+   ]
+  },
+  {
+   "title": "📷 構図・ライト・背景",
+   "open": false,
+   "cats": [
+    "comp",
+    "light",
+    "bg"
+   ]
+  }
+ ],
+ "cats": [
+  {
+   "key": "style",
+   "title": "系統",
+   "note": "※1つ",
+   "role": "style",
+   "mode": "single",
+   "cat": "style",
+   "open": true,
+   "opts": [
+    {
+     "id": "st_clean",
+     "label": "清潔感",
+     "tag": "clean-cut, neat, fresh",
+     "en": "a clean-cut, fresh style",
+     "jp": "清潔感のある雰囲気"
+    },
+    {
+     "id": "st_smart",
+     "label": "きれいめ",
+     "tag": "smart casual, refined",
+     "en": "a refined smart-casual style",
+     "jp": "きれいめ"
+    },
+    {
+     "id": "st_mode",
+     "label": "モード",
+     "tag": "mode fashion, monochrome",
+     "en": "a monochrome mode style",
+     "jp": "モードな雰囲気"
+    },
+    {
+     "id": "st_street",
+     "label": "ストリート",
+     "tag": "streetwear, casual cool",
+     "en": "a casual streetwear style",
+     "jp": "ストリート系"
+    },
+    {
+     "id": "st_biz",
+     "label": "ビジネス",
+     "tag": "businessman, professional",
+     "en": "a sharp businessman style",
+     "jp": "ビジネス系"
+    },
+    {
+     "id": "st_wild",
+     "label": "ワイルド",
+     "tag": "rugged, masculine",
+     "en": "a rugged, masculine style",
+     "jp": "ワイルドな雰囲気"
+    },
+    {
+     "id": "st_prince",
+     "label": "王子様系",
+     "tag": "prince-like, elegant, handsome",
+     "en": "an elegant, prince-like style",
+     "jp": "王子様系"
+    },
+    {
+     "id": "st_kpop",
+     "label": "韓流アイドル",
+     "tag": "korean idol style, k-pop",
+     "en": "a polished K-pop idol style",
+     "jp": "韓流アイドル風"
+    },
+    {
+     "id": "st_dark",
+     "label": "ダーク・ミステリアス",
+     "tag": "dark, mysterious, moody",
+     "en": "a dark, mysterious style",
+     "jp": "ダークでミステリアス"
+    },
+    {
+     "id": "st_athlete",
+     "label": "アスリート",
+     "tag": "sporty, athletic",
+     "en": "a sporty, athletic style",
+     "jp": "アスリート系"
+    },
+    {
+     "id": "st_wa",
+     "label": "和風",
+     "tag": "japanese traditional style",
+     "en": "a Japanese traditional style",
+     "jp": "和風"
+    },
+    {
+     "id": "st_casual",
+     "label": "ナチュラルカジュアル",
+     "tag": "natural casual",
+     "en": "a relaxed natural-casual style",
+     "jp": "ナチュラルカジュアル"
+    }
+   ]
+  },
+  {
+   "key": "subject",
+   "title": "被写体",
+   "note": "※1つ",
+   "role": "subject",
+   "mode": "single",
+   "cat": "subject",
+   "open": true,
+   "opts": [
+    {
+     "id": "s_man",
+     "label": "若い男性",
+     "tag": "1boy, solo, young man",
+     "en": "a young man",
+     "jp": "若い男性",
+     "pron": "He",
+     "plural": "young men"
+    },
+    {
+     "id": "s_manmat",
+     "label": "大人の男性",
+     "tag": "1boy, solo, mature male",
+     "en": "a refined adult man",
+     "jp": "落ち着いた大人の男性",
+     "pron": "He",
+     "plural": "refined adult men"
+    },
+    {
+     "id": "s_student",
+     "label": "学生風",
+     "tag": "1boy, solo, male student",
+     "en": "a male student",
+     "jp": "学生風の男性",
+     "pron": "He",
+     "plural": "male students"
+    },
+    {
+     "id": "s_business",
+     "label": "ビジネスマン",
+     "tag": "1boy, solo, businessman",
+     "en": "a businessman",
+     "jp": "ビジネスマン",
+     "pron": "He",
+     "plural": "businessmen"
+    },
+    {
+     "id": "s_athlete",
+     "label": "アスリート",
+     "tag": "1boy, solo, athletic man",
+     "en": "an athletic man",
+     "jp": "アスリート体型の男性",
+     "pron": "He",
+     "plural": "athletic men"
+    },
+    {
+     "id": "s_gentle",
+     "label": "紳士",
+     "tag": "1boy, solo, gentleman",
+     "en": "a refined gentleman",
+     "jp": "落ち着いた紳士",
+     "pron": "He",
+     "plural": "refined gentlemen"
+    }
+   ]
+  },
+  {
+   "key": "ethnicity",
+   "title": "国籍・人種（雰囲気）",
+   "note": "※1つ",
+   "role": "appearance",
+   "mode": "single",
+   "sub": -1,
+   "cat": "ethnicity",
+   "opts": [
+    {
+     "id": "et_jp",
+     "label": "日本人",
+     "tag": "japanese",
+     "en": "Japanese",
+     "jp": "日本人"
+    },
+    {
+     "id": "et_kr",
+     "label": "韓国系",
+     "tag": "korean",
+     "en": "Korean",
+     "jp": "韓国系"
+    },
+    {
+     "id": "et_cn",
+     "label": "中国系",
+     "tag": "chinese",
+     "en": "Chinese",
+     "jp": "中国系"
+    },
+    {
+     "id": "et_ea",
+     "label": "東アジア系",
+     "tag": "east asian",
+     "en": "East Asian",
+     "jp": "東アジア系"
+    },
+    {
+     "id": "et_sea",
+     "label": "東南アジア系",
+     "tag": "southeast asian",
+     "en": "Southeast Asian",
+     "jp": "東南アジア系"
+    },
+    {
+     "id": "et_west",
+     "label": "欧米系（白人）",
+     "tag": "white, caucasian, western",
+     "en": "white Western",
+     "jp": "欧米系（白人）"
+    },
+    {
+     "id": "et_us",
+     "label": "アメリカ系",
+     "tag": "american",
+     "en": "American",
+     "jp": "アメリカ系"
+    },
+    {
+     "id": "et_eu",
+     "label": "ヨーロッパ系",
+     "tag": "european",
+     "en": "European",
+     "jp": "ヨーロッパ系"
+    },
+    {
+     "id": "et_nordic",
+     "label": "北欧系",
+     "tag": "nordic, scandinavian",
+     "en": "Nordic",
+     "jp": "北欧系"
+    },
+    {
+     "id": "et_latino",
+     "label": "ラテン系",
+     "tag": "latino, hispanic",
+     "en": "Latino",
+     "jp": "ラテン系"
+    },
+    {
+     "id": "et_me",
+     "label": "中東系",
+     "tag": "middle eastern",
+     "en": "Middle Eastern",
+     "jp": "中東系"
+    },
+    {
+     "id": "et_africa",
+     "label": "アフリカ系",
+     "tag": "dark skin, african",
+     "en": "African",
+     "jp": "アフリカ系"
+    },
+    {
+     "id": "et_mixed",
+     "label": "ミックス（ハーフ）",
+     "tag": "mixed race, multiracial",
+     "en": "mixed-race",
+     "jp": "ミックス（ハーフ）"
+    }
+   ]
+  },
+  {
+   "key": "length",
+   "title": "髪の長さ",
+   "note": "※1つ",
+   "role": "hair",
+   "mode": "single",
+   "sub": 2,
+   "cat": "length",
+   "opts": [
+    {
+     "id": "h_vshort",
+     "label": "ベリショ",
+     "tag": "very short hair",
+     "en": "very short hair",
+     "jp": "ベリーショート"
+    },
+    {
+     "id": "h_short",
+     "label": "ショート",
+     "tag": "short hair",
+     "en": "short hair",
+     "jp": "ショート"
+    },
+    {
+     "id": "h_mash",
+     "label": "マッシュ",
+     "tag": "mash cut",
+     "en": "a mash cut",
+     "jp": "マッシュ"
+    },
+    {
+     "id": "h_medium",
+     "label": "ミディアム",
+     "tag": "medium hair",
+     "en": "medium-length hair",
+     "jp": "ミディアム"
+    },
+    {
+     "id": "h_long",
+     "label": "ロング（結ぶ）",
+     "tag": "long hair, tied back, man bun",
+     "en": "longer hair tied back",
+     "jp": "長めの髪を結んで"
+    },
+    {
+     "id": "h_undercut",
+     "label": "刈り上げ",
+     "tag": "undercut, short sides",
+     "en": "an undercut with short sides",
+     "jp": "刈り上げ"
+    },
+    {
+     "id": "h_twoblock",
+     "label": "ツーブロック",
+     "tag": "two-block cut",
+     "en": "a two-block cut",
+     "jp": "ツーブロック"
+    }
+   ]
+  },
+  {
+   "key": "outfit",
+   "title": "服装",
+   "note": "※1つ",
+   "role": "outfit",
+   "mode": "single",
+   "cat": "outfit",
+   "opts": [
+    {
+     "id": "o_shirt",
+     "label": "シャツ",
+     "tag": "collared shirt",
+     "en": "collared shirt",
+     "jp": "シャツ"
+    },
+    {
+     "id": "o_knit",
+     "label": "ニット",
+     "tag": "knit sweater",
+     "en": "knit sweater",
+     "jp": "ニット"
+    },
+    {
+     "id": "o_tshirt",
+     "label": "Tシャツ",
+     "tag": "plain t-shirt",
+     "en": "plain t-shirt",
+     "jp": "Tシャツ"
+    },
+    {
+     "id": "o_polo",
+     "label": "ポロシャツ",
+     "tag": "polo shirt",
+     "en": "polo shirt",
+     "jp": "ポロシャツ"
+    },
+    {
+     "id": "o_turtle",
+     "label": "タートルネック",
+     "tag": "turtleneck",
+     "en": "turtleneck sweater",
+     "jp": "タートルネック"
+    },
+    {
+     "id": "o_suit",
+     "label": "スーツ",
+     "tag": "tailored suit",
+     "en": "tailored suit",
+     "jp": "スーツ"
+    },
+    {
+     "id": "o_tux",
+     "label": "タキシード",
+     "tag": "tuxedo",
+     "en": "elegant tuxedo",
+     "jp": "タキシード"
+    },
+    {
+     "id": "o_jacket",
+     "label": "ジャケット",
+     "tag": "casual jacket",
+     "en": "casual jacket",
+     "jp": "ジャケット"
+    },
+    {
+     "id": "o_leather",
+     "label": "レザージャケット",
+     "tag": "leather jacket",
+     "en": "leather jacket",
+     "jp": "レザージャケット"
+    },
+    {
+     "id": "o_denim",
+     "label": "デニムジャケット",
+     "tag": "denim jacket",
+     "en": "denim jacket",
+     "jp": "デニムジャケット"
+    },
+    {
+     "id": "o_hoodie",
+     "label": "パーカー",
+     "tag": "hoodie",
+     "en": "hoodie",
+     "jp": "パーカー"
+    },
+    {
+     "id": "o_coat",
+     "label": "コート",
+     "tag": "long coat",
+     "en": "long coat",
+     "jp": "コート"
+    },
+    {
+     "id": "o_train",
+     "label": "トレーニングウェア",
+     "tag": "athletic sportswear",
+     "en": "athletic sportswear",
+     "jp": "トレーニングウェア"
+    },
+    {
+     "id": "o_work",
+     "label": "作業着",
+     "tag": "work uniform, coveralls",
+     "en": "work coveralls",
+     "jp": "作業着"
+    },
+    {
+     "id": "o_gakuran",
+     "label": "学ラン",
+     "tag": "japanese school uniform, gakuran",
+     "en": "Japanese gakuran school uniform",
+     "jp": "学ラン"
+    },
+    {
+     "id": "o_kimono",
+     "label": "着物（和装）",
+     "tag": "mens kimono, japanese clothes",
+     "en": "men's kimono",
+     "jp": "和装の着物"
+    },
+    {
+     "id": "o_aloha",
+     "label": "アロハ",
+     "tag": "aloha shirt",
+     "en": "aloha shirt",
+     "jp": "アロハシャツ"
+    }
+   ]
+  },
+  {
+   "key": "expr",
+   "title": "表情",
+   "note": "複数可",
+   "role": "expression",
+   "mode": "multi",
+   "sub": 1,
+   "cat": "expr",
+   "opts": [
+    {
+     "id": "e_smile",
+     "label": "微笑み",
+     "tag": "soft smile",
+     "en": "smiling softly",
+     "jp": "優しく微笑んで"
+    },
+    {
+     "id": "e_fresh",
+     "label": "爽やかな笑顔",
+     "tag": "bright smile",
+     "en": "with a bright, fresh smile",
+     "jp": "爽やかに笑って"
+    },
+    {
+     "id": "e_laugh",
+     "label": "笑い",
+     "tag": "laughing, cheerful",
+     "en": "laughing cheerfully",
+     "jp": "声を上げて笑って"
+    },
+    {
+     "id": "e_cool",
+     "label": "クール",
+     "tag": "calm expression",
+     "en": "keeping a calm, cool expression",
+     "jp": "クールな表情で"
+    },
+    {
+     "id": "e_serious",
+     "label": "真剣",
+     "tag": "serious expression",
+     "en": "with a serious look",
+     "jp": "真剣な表情で"
+    },
+    {
+     "id": "e_smirk",
+     "label": "不敵",
+     "tag": "confident smirk",
+     "en": "with a confident smirk",
+     "jp": "不敵な表情で"
+    },
+    {
+     "id": "e_calm",
+     "label": "穏やか",
+     "tag": "gentle calm expression",
+     "en": "with a gentle, calm expression",
+     "jp": "穏やかな表情で"
+    },
+    {
+     "id": "e_intense",
+     "label": "キメ顔",
+     "tag": "intense gaze, sharp expression",
+     "en": "with a sharp, intense expression",
+     "jp": "キメ顔で"
+    }
+   ]
+  },
+  {
+   "key": "pose",
+   "title": "ポーズ・仕草",
+   "note": "複数可",
+   "role": "pose",
+   "mode": "multi",
+   "cat": "pose",
+   "opts": [
+    {
+     "id": "p_stand",
+     "label": "立ち",
+     "tag": "standing",
+     "en": "standing",
+     "jp": "立って"
+    },
+    {
+     "id": "p_arms",
+     "label": "腕組み",
+     "tag": "arms crossed",
+     "en": "with arms crossed",
+     "jp": "腕を組んで"
+    },
+    {
+     "id": "p_lean",
+     "label": "壁にもたれ",
+     "tag": "leaning against wall",
+     "en": "leaning against a wall",
+     "jp": "壁にもたれて"
+    },
+    {
+     "id": "p_hair",
+     "label": "髪をかきあげ",
+     "tag": "hand in own hair",
+     "en": "with one hand in the hair",
+     "jp": "髪をかきあげて"
+    },
+    {
+     "id": "p_pocket",
+     "label": "ポケットに手",
+     "tag": "hands in pockets",
+     "en": "with hands in pockets",
+     "jp": "ポケットに手を入れて"
+    },
+    {
+     "id": "p_chin",
+     "label": "顎に手",
+     "tag": "hand on chin",
+     "en": "with a hand on the chin",
+     "jp": "顎に手を添えて"
+    },
+    {
+     "id": "p_turn",
+     "label": "振り向き",
+     "tag": "looking back over shoulder",
+     "en": "turning to look back",
+     "jp": "振り向いて"
+    },
+    {
+     "id": "p_sit",
+     "label": "座り",
+     "tag": "sitting",
+     "en": "sitting",
+     "jp": "座って"
+    },
+    {
+     "id": "p_walk",
+     "label": "歩き",
+     "tag": "walking",
+     "en": "walking",
+     "jp": "歩きながら"
+    }
+   ]
+  },
+  {
+   "key": "comp",
+   "title": "構図・アングル",
+   "note": "※1つ",
+   "role": "camera",
+   "mode": "single",
+   "sub": 1,
+   "cat": "comp",
+   "opts": [
+    {
+     "id": "cm_bust",
+     "label": "バストアップ",
+     "tag": "bust shot, upper body",
+     "en": "a bust-up composition",
+     "jp": "バストアップ"
+    },
+    {
+     "id": "cm_face",
+     "label": "顔アップ",
+     "tag": "close-up, face focus",
+     "en": "a close-up of the face",
+     "jp": "顔のアップ"
+    },
+    {
+     "id": "cm_full",
+     "label": "全身",
+     "tag": "full body",
+     "en": "a full-body shot",
+     "jp": "全身"
+    },
+    {
+     "id": "cm_cowboy",
+     "label": "膝上",
+     "tag": "cowboy shot",
+     "en": "a knee-up shot",
+     "jp": "膝上ショット"
+    },
+    {
+     "id": "cm_low",
+     "label": "ローアングル",
+     "tag": "low angle, looking up",
+     "en": "a dynamic low-angle shot",
+     "jp": "ローアングル"
+    },
+    {
+     "id": "cm_high",
+     "label": "俯瞰",
+     "tag": "high angle, from above",
+     "en": "a high-angle shot from above",
+     "jp": "俯瞰アングル"
+    }
+   ]
+  },
+  {
+   "key": "light",
+   "title": "ライティング",
+   "note": "※1つ",
+   "role": "lighting",
+   "mode": "single",
+   "adv": true,
+   "cat": "light",
+   "opts": [
+    {
+     "id": "li_natural",
+     "label": "自然光",
+     "tag": "soft natural light",
+     "en": "soft natural lighting",
+     "jp": "柔らかい自然光"
+    },
+    {
+     "id": "li_studio",
+     "label": "スタジオ",
+     "tag": "studio softbox lighting",
+     "en": "clean studio softbox lighting",
+     "jp": "スタジオ照明"
+    },
+    {
+     "id": "li_rim",
+     "label": "逆光・リム",
+     "tag": "backlight, rim light",
+     "en": "a glowing backlit rim light",
+     "jp": "逆光のリムライト"
+    },
+    {
+     "id": "li_drama",
+     "label": "ドラマチック",
+     "tag": "dramatic lighting, chiaroscuro",
+     "en": "dramatic high-contrast lighting",
+     "jp": "ドラマチックな陰影"
+    },
+    {
+     "id": "li_morning",
+     "label": "朝の光",
+     "tag": "soft morning light",
+     "en": "soft morning light",
+     "jp": "柔らかな朝の光"
+    },
+    {
+     "id": "li_neon",
+     "label": "ネオン",
+     "tag": "neon lighting, colorful",
+     "en": "moody colorful neon lighting",
+     "jp": "ネオンの光"
+    }
+   ]
+  },
+  {
+   "key": "bg",
+   "title": "背景・シーン",
+   "note": "※1つ",
+   "role": "background",
+   "mode": "single",
+   "cat": "bg",
+   "opts": [
+    {
+     "id": "d_white",
+     "label": "白背景",
+     "tag": "plain white background",
+     "en": "a plain white background",
+     "jp": "白背景"
+    },
+    {
+     "id": "d_simple",
+     "label": "シンプル単色",
+     "tag": "simple solid background",
+     "en": "a simple solid-color background",
+     "jp": "シンプルな単色背景"
+    },
+    {
+     "id": "d_street",
+     "label": "街中",
+     "tag": "city street",
+     "en": "a city street",
+     "jp": "街中"
+    },
+    {
+     "id": "d_office",
+     "label": "オフィス",
+     "tag": "modern office interior",
+     "en": "a modern office interior",
+     "jp": "オフィス"
+    },
+    {
+     "id": "d_night",
+     "label": "夜の街",
+     "tag": "blurred night city, bokeh lights",
+     "en": "a blurred night cityscape with bokeh",
+     "jp": "夜の街並み"
+    },
+    {
+     "id": "d_out",
+     "label": "屋外・自然",
+     "tag": "outdoor, nature, greenery",
+     "en": "an outdoor natural setting",
+     "jp": "屋外の自然"
+    },
+    {
+     "id": "d_cafe",
+     "label": "カフェ内",
+     "tag": "cozy cafe interior",
+     "en": "a cozy cafe interior",
+     "jp": "カフェの店内"
+    },
+    {
+     "id": "d_gym",
+     "label": "ジム",
+     "tag": "modern gym interior",
+     "en": "a modern gym interior",
+     "jp": "ジムの中"
+    },
+    {
+     "id": "d_sea",
+     "label": "海辺",
+     "tag": "beach, seaside",
+     "en": "a seaside beach",
+     "jp": "海辺"
+    },
+    {
+     "id": "d_study",
+     "label": "書斎",
+     "tag": "study room, bookshelves",
+     "en": "a study with bookshelves",
+     "jp": "書斎"
+    },
+    {
+     "id": "d_brick",
+     "label": "レンガ壁",
+     "tag": "brick wall",
+     "en": "a brick wall backdrop",
+     "jp": "レンガの壁"
+    },
+    {
+     "id": "d_hotel",
+     "label": "ホテルラウンジ",
+     "tag": "luxury hotel lounge",
+     "en": "a luxury hotel lounge",
+     "jp": "高級ホテルのラウンジ"
+    }
+   ]
+  }
+ ],
+ "presets": [
+  {
+   "label": "🧥 清潔感",
+   "ids": [
+    "m_photo",
+    "s_man",
+    "st_clean",
+    "et_jp",
+    "h_short",
+    "o_shirt",
+    "e_fresh",
+    "p_stand",
+    "cm_bust",
+    "li_natural",
+    "d_simple"
+   ]
+  },
+  {
+   "label": "🖤 モード",
+   "ids": [
+    "m_photo",
+    "s_manmat",
+    "st_mode",
+    "et_jp",
+    "h_short",
+    "o_suit",
+    "e_cool",
+    "p_arms",
+    "cm_cowboy",
+    "li_drama",
+    "d_night"
+   ]
+  },
+  {
+   "label": "🌆 ストリート",
+   "ids": [
+    "m_photo",
+    "s_man",
+    "st_street",
+    "et_jp",
+    "h_mash",
+    "o_hoodie",
+    "e_smirk",
+    "p_pocket",
+    "cm_full",
+    "li_natural",
+    "d_street"
+   ]
+  }
+ ]
+};
+PACK.prohibitJP=function(){return '未成年に見える演出、性的な文脈、露骨な性的表現、局部の露出、挑発的なポーズ、過度な煽りのローアングル。';};
+PACK.prohibitEN=function(){return 'any underage-looking depiction, sexual context, explicit content, exposed genitals, provocative poses, extreme low-angle shots.';};
+
+/* ENGINE */
+/* ===== error surface (so problems are visible, not silent) ===== */
+function showErr(m,line){try{var b=document.getElementById('__err');if(!b){b=document.createElement('div');b.id='__err';b.style.cssText='position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#b00020;color:#fff;font:12px/1.5 sans-serif;padding:8px 12px;white-space:pre-wrap;';document.body.appendChild(b);}b.textContent='⚠ エラー: '+m+(line?(' (line '+line+')'):'')+'  — この文をコピーして開発者に伝えてください。';}catch(_){}}
+window.onerror=function(msg,src,line,col,err){showErr((err&&err.message)?err.message:msg,line);return false;};
+
+/* ===== MODELS (June 2026) ===== */
+const MODELS=[
+ {id:'gpt',name:'GPT Image 2',sub:'ChatGPT / OpenAI',fam:'prose',famtag:'TXT',neg:false,
+  tip:'指示理解が最強。崩したくない要素・文字・配置を文中で具体的に書くほど正確に。旧DALL·E 3の後継。ネガティブ非対応なので避けたい物も肯定文で。',
+  set:'ChatGPT/APIに貼付。比率・枚数は会話で指定。'},
+ {id:'nano',name:'Nano Banana Pro',sub:'Gemini 3 Flash Image',fam:'prose',famtag:'TXT',neg:false,
+  tip:'画像編集とキャラ一貫性に最強。1枚目を添付して「同じ人物のまま衣装だけ変えて」が効きます。日本語プロンプトも高精度。',
+  set:'Gemini/AI Studioで。参照画像＋会話で微調整。'},
+ {id:'imagen',name:'Imagen 4',sub:'Google',fam:'prose',famtag:'TXT',neg:false,
+  tip:'写真的な質感と肌表現が自然。文字描写も得意。光・レンズ・空気感を具体的に書くと伸びます。',
+  set:'Gemini/Vertex AIで。比率は文中またはUIで。'},
+ {id:'flux',name:'FLUX.2',sub:'Black Forest Labs',fam:'flux',famtag:'TXT',neg:false,
+  tip:'自然文1〜2段落が最適。品質呪文・ネガティブはほぼ無効なので具体描写で質を上げます。手指の安定性とテキスト描写が強い。',
+  set:'[pro]はAPI / [dev]はローカル。Steps 28・Guidance 3.5目安。'},
+ {id:'seedream',name:'Seedream 4.5',sub:'ByteDance',fam:'prose',famtag:'TXT',neg:false,
+  tip:'文字入り・4K・商品/広告系に強い。看板やパッケージの文字も正確。被写体＋背景＋文字を分けて記述。',
+  set:'対応プラットフォームで。最大4K出力。'},
+ {id:'ideogram',name:'Ideogram 4',sub:'タイポ特化',fam:'prose',famtag:'TXT',neg:false,
+  tip:'画像内テキスト（ロゴ・キャッチ）の再現が随一。文字は引用符で囲んで指定すると正確です。',
+  set:'Ideogram/APIで。Magic Promptは任意でON/OFF。'},
+ {id:'recraft',name:'Recraft V4',sub:'デザイン/ベクター',fam:'prose',famtag:'TXT',neg:false,
+  tip:'ブランド資産・ベクター・統一感のあるデザインに強い。スタイル指定とカラーパレットを明記すると安定。',
+  set:'Recraftで。スタイル/パレット機能を併用。'},
+ {id:'qwen',name:'Qwen-Image',sub:'オープン/CJK文字',fam:'prose',famtag:'TXT',neg:false,
+  tip:'オープンモデルでコスパ良。日本語・中国語の文字描写が比較的得意。自然文で指示します。',
+  set:'対応UI/ローカルで。Steps・CFGは実装に準拠。'},
+ {id:'mj',name:'Midjourney v7',sub:'/ v8 alpha',fam:'mj',famtag:'MJ',neg:'param',niji:false,
+  tip:'芸術性・雰囲気が随一。キャラ固定は --cref [URL] --cw 100。実写は --style raw。文章＋末尾パラメータで制御。',
+  set:'末尾パラメータで調整。--ar 比率 / --s 画風強度 / --q 品質。'},
+ {id:'niji',name:'niji 6',sub:'Midjourney アニメ',fam:'mj',famtag:'MJ',neg:'param',niji:true,
+  tip:'アニメ/イラスト専用エンジン。常に --niji 6 を付与。--style cute/scenic 等の指定も有効。',
+  set:'--niji 6 を自動付与。--ar 比率 / --s 画風強度。'},
+ {id:'nai',name:'NovelAI V4.5',sub:'アニメ専用/独自',fam:'tag',famtag:'TAG',variant:'nai',neg:true,
+  tip:'アニメ特化の最高峰。品質タグは「末尾」に置くのが流儀。強調は { } で1.05倍ずつ。Undesired Contentがネガティブ欄。',
+  set:'Steps 28 / Guidance 5 / Euler Ancestral。品質タグは末尾・強調は{ }。'},
+ {id:'illust',name:'Illustrious XL',sub:'v2 / アニメ基盤',fam:'tag',famtag:'TAG',variant:'illust',neg:true,
+  tip:'現行アニメ生成の標準。Danbooruタグに忠実。年代タグ（newest等）で絵柄が変わります。WAI系派生も同系統。',
+  set:'Steps 28–30 / CFG 5–6 / Euler a。1024基準。'},
+ {id:'noob',name:'NoobAI-XL',sub:'Illustrious派生',fam:'tag',famtag:'TAG',variant:'noob',neg:true,
+  tip:'タグ管理が緻密。「very awa」等の美的タグが効く。V-pred版は色域・光が強い反面、設定に敏感です。',
+  set:'Steps 28 / CFG 5（V-predは3.5–4）/ Euler a。1024基準。'},
+ {id:'animagine',name:'Animagine XL 4.0',sub:'Cagliostro',fam:'tag',famtag:'TAG',variant:'animagine',neg:true,
+  tip:'安定したアニメ出力。品質語彙が独特（high score, great score）。タグ順と年代タグで調整します。',
+  set:'Steps 25–28 / CFG 5–6 / Euler a。1024基準。'},
+ {id:'pony',name:'Pony V6 XL',sub:'汎用アニメ/3D',fam:'tag',famtag:'TAG',variant:'pony',neg:true,
+  tip:'先頭の score タグが必須。rating_safe で健全寄りに固定。source_anime/realistic で画風を切替できます。',
+  set:'Steps 25–30 / CFG 6–7 / Euler a。1024基準。'},
+ {id:'sdxl',name:'SDXL',sub:'汎用 / 実写系',fam:'tag',famtag:'TAG',variant:'sdxl',neg:true,
+  tip:'実写は写真系チェックポイント推奨。Hires.fixで高解像度化すると破綻が減ります。LoRA資産が豊富。',
+  set:'Steps 30 / CFG 7 / DPM++ 2M Karras。1024基準。'},
+ {id:'sd35',name:'SD 3.5',sub:'Stability/自然文寄り',fam:'flux',famtag:'TXT',neg:false,
+  tip:'自然文の方が得意な世代。タグも通りますが、文章で具体的に描写するのがおすすめ。LoRA/微調整が自由。',
+  set:'Large推奨。Steps 28–40 / CFG 4–5。'},
+ {id:'sd15',name:'SD 1.5',sub:'レガシー',fam:'tag',famtag:'TAG',variant:'sd15',neg:true,
+  tip:'EasyNegative等のembedding併用が前提。512基準で生成→Hires化が定番。古いLoRA資産向け。',
+  set:'Steps 28 / CFG 7 / DPM++ 2M Karras。512→Hires。'},
+];
+const MODEL_GROUPS=[
+ {label:'自然言語系（文章で指示・ネガティブ無）',ids:['gpt','nano','imagen','flux','seedream','ideogram','recraft','qwen','sd35']},
+ {label:'ハイブリッド（文章＋パラメータ）',ids:['mj','niji']},
+ {label:'タグ系（Danbooru / 呪文）',ids:['nai','illust','noob','animagine','pony','sdxl','sd15']},
+];
+const ENGINE_MEDIA=[
+ {id:'m_photo',label:'実写・写真',en:'a photorealistic portrait photograph',jp:'リアルな実写写真'},
+ {id:'m_anime',label:'アニメ・イラスト',en:'an anime-style illustration',jp:'アニメ調のイラスト'},
+ {id:'m_film',label:'フィルム写真',en:'an analog film photograph with subtle grain',jp:'フィルムカメラ風の写真'},
+ {id:'m_3d',label:'3D・CG',en:'a polished 3D rendered character, octane render',jp:'3DCGのキャラクター'},
+ {id:'m_water',label:'水彩・絵画',en:'a soft watercolor illustration',jp:'水彩画風のイラスト'},
+];
+const MEDIA=(PACK.media&&PACK.media.length)?PACK.media:ENGINE_MEDIA;
+const ASPECTS=[
+ {id:'1:1',label:'1:1 正方形'},{id:'4:5',label:'4:5 SNS縦'},{id:'3:4',label:'3:4 縦'},
+ {id:'9:16',label:'9:16 リール'},{id:'16:9',label:'16:9 横'},{id:'2:3',label:'2:3 ポートレート'},
+];
+const RES1024={'1:1':'1024×1024','4:5':'896×1152','3:4':'896×1152','9:16':'768×1344','16:9':'1344×768','2:3':'832×1216'};
+const RES512 ={'1:1':'512×512','4:5':'512×640','3:4':'512×680','9:16':'512×896','16:9':'896×512','2:3':'512×768'};
+
+/* ===== CATEGORIES ===== */
+const TROUBLE=[{id:'hands',label:'手・指が崩れる'},{id:'face',label:'顔が崩れる/左右非対称'},{id:'sharp',label:'画像がぼやける'},{id:'clean',label:'余計な物が写り込む'}];
+
+const OPT={}; PACK.cats.forEach(c=>c.opts.forEach(o=>{OPT[o.id]={...o,role:c.role,sub:(o.sub!=null?o.sub:(c.sub||50)),cat:c.cat||c.key};}));
+const MEDIA_BY={}; MEDIA.forEach(m=>MEDIA_BY[m.id]=m);
+
+const S={
+  model:PACK.defaults.model, medium:PACK.defaults.medium, aspect:PACK.defaults.aspect, lang:PACK.defaults.lang,
+  sel:new Set(), locked:new Set(),
+  fixes:{hands:false,face:false,sharp:false,clean:false},
+  qLevel:1, prose:1, neg:1, proseStyle:0, emph:{}, real:{natural:false,deai:false,grain:false},
+  sheet:{on:false,face:true,hands:true,shoes:true,acc:true}, hires:false, intensity:1, series:false, people:0,
+};
+
+/* ===== UI BUILD ===== */
+function el(t,c,h){const e=document.createElement(t);if(c)e.className=c;if(h!=null)e.innerHTML=h;return e;}
+function buildModels(){
+  const g=document.getElementById('modelGrid');
+  MODEL_GROUPS.forEach(grp=>{
+    g.appendChild(el('div','grp-label',grp.label));
+    grp.ids.forEach(id=>{
+      const m=MODELS.find(x=>x.id===id);
+      const b=el('div','mbtn'+(S.model===id?' active':''));
+      b.dataset.mid=id;
+      b.innerHTML='<span class="mfam">'+m.famtag+'</span><span class="mn">'+m.name+'</span><span class="ms">'+m.sub+'</span>';
+      b.onclick=()=>{S.model=id;selectModelBtn();render();};
+      g.appendChild(b);
+    });
+  });
+}
+function selectModelBtn(){document.querySelectorAll('#modelGrid .mbtn').forEach(b=>b.classList.toggle('active',b.dataset.mid===S.model));}
+function buildChips(containerId,arr,name,getId,getLabel,onPick,checkedId){
+  const c=document.getElementById(containerId);
+  arr.forEach(it=>{
+    const id=getId(it);const inp=el('input');inp.type='radio';inp.name=name;inp.id=name+'_'+id;
+    if(id===checkedId)inp.checked=true;inp.onchange=()=>{onPick(id);render();};
+    const lab=el('label');lab.htmlFor=name+'_'+id;lab.textContent=getLabel(it);
+    c.appendChild(inp);c.appendChild(lab);
+  });
+}
+function buildSeg(id,labels,key){
+  const host=document.getElementById(id);
+  labels.forEach((lab,i)=>{const b=document.createElement('button');b.textContent=lab;b.className=(S[key]===i?'on':'');
+    b.onclick=()=>{S[key]=i;[...host.children].forEach((c,j)=>c.classList.toggle('on',j===i));render();};host.appendChild(b);});
+}
+function buildPresets(){
+  const r=document.getElementById('presetRow');
+  PACK.presets.forEach((p,i)=>{const b=el('button','btn btn-preset',p.label);b.onclick=()=>applyPreset(i);r.appendChild(b);});
+}
+function buildCatCard(c){
+  const d=el('details');if(c.open)d.open=true;
+  const sum=el('summary');
+  sum.innerHTML='<span>'+c.title+'<span class="cat-note">'+(c.note||'')+'</span></span>';
+  const right=el('div','sum-right');
+  const lock=el('button','lockbtn','🔓');lock.title='固定（ガチャ除外）';
+  lock.onclick=(e)=>{e.preventDefault();e.stopPropagation();if(S.locked.has(c.key)){S.locked.delete(c.key);lock.classList.remove('on');lock.textContent='🔓';}else{S.locked.add(c.key);lock.classList.add('on');lock.textContent='🔒';}};
+  right.appendChild(lock);right.appendChild(el('span','caret','▼'));
+  sum.appendChild(right);
+  const wrap=el('div','tag-wrap');
+  c.opts.forEach(o=>{
+    const inp=el('input','tag-input');inp.type=c.mode==='single'?'radio':'checkbox';
+    inp.name=c.mode==='single'?'cat_'+c.key:o.id;inp.id='in_'+o.id;inp.value=o.id;
+    inp.onchange=()=>{syncSel();render();};
+    const lab=el('label','tag-label');lab.htmlFor='in_'+o.id;lab.textContent=o.label;
+    const w=el('div');w.appendChild(inp);w.appendChild(lab);wrap.appendChild(w);
+  });
+  d.appendChild(sum);d.appendChild(wrap);
+  return d;
+}
+function buildCats(){
+  const host=document.getElementById('catGroups');if(!host)return;host.innerHTML='';
+  const byKey={};PACK.cats.forEach(c=>byKey[c.key]=c);
+  const used=new Set();
+  const groups=(PACK.groups&&PACK.groups.length)?PACK.groups:[{title:'設定',open:true,cats:PACK.cats.map(c=>c.key)}];
+  groups.forEach(g=>{
+    const gd=el('details','grp');if(g.open)gd.open=true;
+    const gs=el('summary','grp-sum');gs.innerHTML='<span>'+g.title+'</span><span class="caret">▼</span>';
+    gd.appendChild(gs);
+    const inner=el('div','grp-body');
+    g.cats.forEach(k=>{const c=byKey[k];if(!c)return;used.add(k);inner.appendChild(buildCatCard(c));});
+    gd.appendChild(inner);host.appendChild(gd);
+  });
+  const left=PACK.cats.filter(c=>!used.has(c.key));
+  if(left.length){const gd=el('details','grp');const gs=el('summary','grp-sum');gs.innerHTML='<span>🎚 その他の詳細</span><span class="caret">▼</span>';gd.appendChild(gs);const inner=el('div','grp-body');left.forEach(c=>inner.appendChild(buildCatCard(c)));gd.appendChild(inner);host.appendChild(gd);}
+}
+function buildFixToggles(){
+  const f=document.getElementById('fixToggles'),t=document.getElementById('troubleChips');
+  TROUBLE.forEach(tr=>{
+    [f,t].forEach(host=>{
+      const lab=el('label','toggle');const inp=el('input');inp.type='checkbox';inp.dataset.fix=tr.id;
+      inp.onchange=()=>{S.fixes[tr.id]=inp.checked;document.querySelectorAll('input[data-fix="'+tr.id+'"]').forEach(x=>{x.checked=inp.checked;x.parentElement.classList.toggle('on',inp.checked);});render();};
+      lab.appendChild(inp);lab.appendChild(document.createTextNode(' '+tr.label));host.appendChild(lab);
+    });
+  });
+}
+
+/* ===== SELECTION ===== */
+function syncSel(){S.sel=new Set();document.querySelectorAll('.tag-input:checked').forEach(i=>S.sel.add(i.value));}
+function setChecked(id,on){const e=document.getElementById('in_'+id);if(e)e.checked=on;}
+function clearAll(){pushUndo();document.querySelectorAll('.tag-input').forEach(i=>i.checked=false);document.getElementById('freeText').value='';syncSel();render();}
+function applyPresetCore(i){
+  document.querySelectorAll('.tag-input').forEach(x=>x.checked=false);
+  PACK.presets[i].ids.forEach(id=>{
+    if(MEDIA_BY[id]){S.medium=id;const m=document.getElementById('medium_'+id);if(m)m.checked=true;return;}
+    setChecked(id,true);
+  });
+  syncSel();render();
+}
+function applyPreset(i){pushUndo();applyPresetCore(i);}
+function randomize(){
+  pushUndo();
+  PACK.cats.forEach(c=>{
+    if(S.locked.has(c.key))return;
+    c.opts.forEach(o=>setChecked(o.id,false));
+    if(c.mode==='single'){const o=c.opts[Math.floor(Math.random()*c.opts.length)];setChecked(o.id,true);}
+    else{const n=Math.floor(Math.random()*2)+1;const sh=[...c.opts].sort(()=>Math.random()-.5);for(let k=0;k<n;k++)setChecked(sh[k].id,true);}
+  });
+  syncSel();render();
+}
+
+/* ===== HELPERS ===== */
+function cap(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s;}
+function frag(role){return [...S.sel].map(id=>OPT[id]).filter(o=>o&&o.role===role).sort((a,b)=>a.sub-b.sub);}
+function frag2(cat){return [...S.sel].map(id=>OPT[id]).filter(o=>o&&o.cat===cat);}
+function peopleData(){
+  const p=S.people||0; if(!p)return null;
+  if(S.sheet&&S.sheet.on)return null; // character sheet is a single-character turnaround
+  const sb=frag('subject')[0]||{en:'a young woman',jp:'女性',plural:'young women',tag:'1girl'};
+  const male=/\b(1boy|boys?|male|man|men)\b/i.test(sb.tag||'');
+  const noun=sb.plural||(sb.en||'a young woman').replace(/^(a|an)\s+/i,'').replace(/woman$/,'women').replace(/man$/,'men').replace(/girl$/,'girls').replace(/boy$/,'boys');
+  const G=male?'boys':'girls', G1=male?'1boy':'1girl', G2=male?'2boys':'2girls', G3=male?'3boys':'3girls';
+  const ANTI='extra arms, extra legs, extra limbs, extra hands, fused bodies, conjoined, mutated hands, malformed limbs, deformed';
+  let r={n:p,male,noun,couple:false};
+  if(p===1){r.count='two';r.en='two '+noun;r.jp='二人の'+sb.jp;r.tag=G2+', multiple '+G+', two people';r.neg=ANTI+', solo, '+G1+', '+G3;}
+  else if(p===2){r.count='three';r.en='three '+noun;r.jp='三人の'+sb.jp;r.tag=G3+', multiple '+G+', three people';r.neg=ANTI+', solo, '+G1+', '+G2;}
+  else if(p===3){r.count='a group of';r.en='a group of '+noun;r.jp=sb.jp+'たちのグループ';r.tag='multiple '+G+', 6+'+G+', crowd, group';r.neg=ANTI+', solo, '+G1;}
+  else{r.couple=true;r.count='';r.en='a young man and a young woman together as a couple';r.jp='若い男女のカップル';r.tag='1girl, 1boy, couple, hetero, two people';r.neg=ANTI+', solo, 2girls, 2boys, futanari';}
+  return r;
+}
+function pron(){if(S.people)return 'They';const sb=frag('subject')[0];return sb&&sb.pron?sb.pron:'She';}
+function isPhoto(){return S.medium==='m_photo'||S.medium==='m_film';}
+function isAnime(){return S.medium==='m_anime';}
+function getv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function lockData(){
+  if(!document.getElementById('lockOn').checked)return null;
+  const o={name:getv('lkName'),eyes:getv('lkEyes'),hair:getv('lkHair'),body:getv('lkBody'),feat:getv('lkFeat')};
+  if(!o.name&&!o.eyes&&!o.hair&&!o.body&&!o.feat)return null;return o;
+}
+function hairPhraseEN(){
+  const color=frag2('color')[0],len=frag2('length')[0],bang=frag2('bangs')[0],arr=frag2('arrange')[0];
+  if(!color&&!len&&!bang&&!arr)return'';
+  let core=[(color?color.en:''),(len?len.en:'hair')].filter(Boolean).join(' ');
+  let extra=[arr?arr.en:'',bang?(bang.id==='bg_none'?'no bangs':'with '+bang.en):''].filter(Boolean).join(', ');
+  return (core+(extra?', '+extra:'')).trim();
+}
+function hairPhraseJP(){
+  const color=frag2('color')[0],len=frag2('length')[0],bang=frag2('bangs')[0],arr=frag2('arrange')[0];
+  if(!color&&!len&&!bang&&!arr)return'';
+  return [color?color.jp:'',len?len.jp:'',arr?arr.jp:'',bang?bang.jp:''].filter(Boolean).join('・')+'の髪';
+}
+function outfitPhraseEN(){
+  const g=frag2('outfit')[0];const c=frag2('ocolor');
+  if(!g&&!c.length)return'';
+  const color=c.length?c.map(x=>x.en).join(' '):'';
+  if(!g)return 'in '+color+' tones';
+  const ph=(color?color+' ':'')+g.en;
+  return (/^[aeiou]/i.test(ph)?'an ':'a ')+ph;
+}
+function outfitPhraseJP(){
+  const g=frag2('outfit')[0];const c=frag2('ocolor');
+  if(!g&&!c.length)return'';
+  const color=c.length?c.map(x=>x.jp).join('・'):'';
+  if(!g)return color+'系の装い';
+  return (color?color+'系の':'')+g.jp;
+}
+
+/* ===== QUALITY / NEGATIVE (tag models) ===== */
+function medExtra(){
+  if(S.medium==='m_photo')return 'realistic, photorealistic, ';
+  if(S.medium==='m_film')return 'analog film photo, film grain, ';
+  if(S.medium==='m_3d')return '3d, cgi, ';
+  if(S.medium==='m_water')return 'watercolor (medium), traditional media, ';
+  return '';
+}
+function leadFor(v,q){
+  const det = q>=3 ? 'extremely detailed, intricate details, ultra-detailed, ' : q>=2 ? 'highly detailed, ' : '';
+  if(v==='pony'){
+    const src = isPhoto()?'source_realistic, ':isAnime()?'source_anime, ':'';
+    return 'score_9, score_8_up, score_7_up, score_6_up, score_5_up, score_4_up, rating_safe, '+src+det;
+  }
+  if(v==='illust')   return 'masterpiece, best quality, newest, absurdres, highres, '+det;
+  if(v==='noob')     return 'masterpiece, best quality, newest, absurdres, highres, very awa, '+det;
+  if(v==='animagine')return 'masterpiece, high score, great score, absurdres, '+det;
+  if(v==='sdxl')     return 'masterpiece, best quality, ultra-detailed, very aesthetic, '+det;
+  if(v==='sd15')     return (q>=2?'(masterpiece:1.2), (best quality:1.2), ':'masterpiece, best quality, ')+'ultra-detailed, '+det;
+  if(v==='nai')      return '';
+  return '';
+}
+function naiTail(q){return ', very aesthetic, masterpiece, '+(q>=2?'absurdres, ':'')+'best quality, no text, rating:general';}
+function fixPosTags(){
+  const f=S.fixes,a=[];
+  if(f.hands)a.push('perfect hands','detailed fingers');
+  if(f.face)a.push('detailed symmetric face','beautiful detailed eyes');
+  if(f.sharp)a.push('sharp focus');
+  if(f.clean)a.push('simple clean background');
+  return a.join(', ');
+}
+function negTags(v){
+  const f=S.fixes,n=S.neg,p=[];
+  if(v==='sd15')p.push('EasyNegative');
+  if(v==='pony')p.push('score_6, score_5, score_4');
+  if(v==='nai')p.push('nsfw, lowres, worst quality, low quality');
+  else p.push('lowres, worst quality, low quality'+(n>=1?', normal quality, jpeg artifacts':''));
+  p.push('nsfw, suggestive');
+  if(n>=1)p.push('bad anatomy, bad proportions, deformed, disfigured');
+  if(n>=2)p.push('mutation, extra limbs, missing limbs, fused fingers, long neck, cropped, error');
+  if(n>=1)p.push('text, watermark, signature, username, logo');
+  if(f.hands)p.push('bad hands, missing fingers, extra fingers, fused fingers, mutated hands, poorly drawn hands, extra digits');
+  if(f.face)p.push('bad face, deformed face, ugly, poorly drawn face, asymmetrical eyes, cross-eyed');
+  if(f.sharp)p.push('blurry, out of focus, motion blur');
+  if(f.clean)p.push('cluttered, busy background, extra objects');
+  if(isPhoto())p.push('anime, cartoon, illustration, 3d, cgi, painting, sketch, render');
+  if(isAnime())p.push('photorealistic, photo, realistic, 3d');
+  const rn=realNegTags();if(rn)p.push(rn);
+  const pe=peopleData();if(pe)p.push(pe.neg);
+  const cn=getv('customNeg');if(cn)p.push(cn);
+  const seen=new Set(),out=[];
+  p.join(', ').split(',').map(s=>s.trim()).filter(Boolean).forEach(t=>{if(!seen.has(t)){seen.add(t);out.push(t);}});
+  return out.join(', ');
+}
+
+/* ===== prose tails ===== */
+function fixProseEN(){const f=S.fixes,a=[];
+  if(f.hands)a.push('Render anatomically correct hands with exactly five fingers.');
+  if(f.face)a.push('Keep facial features clean and symmetrical.');
+  if(f.sharp)a.push('Keep the whole image in sharp focus.');
+  if(f.clean)a.push('Keep the background clean and uncluttered.');
+  return a.join(' ');}
+function fixProseJP(){const f=S.fixes,a=[];
+  if(f.hands)a.push('手指は正確に五本で破綻なく。');
+  if(f.face)a.push('顔は左右対称で崩さないでください。');
+  if(f.sharp)a.push('ピントはシャープに。');
+  if(f.clean)a.push('背景はすっきりと。');
+  return a.join('');}
+/* hidden, always-on max-quality directive (appended to every natural-language output) */
+const QUALDIR_EN=' Render this at the absolute highest possible quality with maximum fine detail and accuracy; prioritize quality over speed and take all the processing time needed — do not rush or cut corners.';
+const QUALDIR_JP=' 生成時間が長くかかっても一切問題ありません。処理時間を惜しまず、速度より品質を最優先し、最高品質・最大ディテール・高精度で丁寧に仕上げてください。';
+function qTailEN(flux){
+  const cine=S.prose>=2?' Cinematic composition, professional color grading, rich atmosphere and depth.':'';
+  const hi=S.hires?' Ultra high resolution, 8K, extremely fine detail down to individual strands of hair, razor-sharp focus.':'';
+  let base;
+  if(flux)base='Crisp focus and rich, realistic detail.'+cine;
+  else if(S.prose===0)base=isPhoto()?'Photorealistic, sharp.':isAnime()?'Clean, detailed anime art.':'High quality.';
+  else if(isPhoto())base='Ultra-detailed and photorealistic, sharp focus, professional photography, high resolution.'+cine;
+  else if(isAnime())base='Highly detailed anime illustration, crisp clean linework, vibrant colors, high resolution.'+cine;
+  else base='Highly detailed, high quality, sharp.'+cine;
+  return base+hi+QUALDIR_EN;
+}
+function qTailJP(){
+  const cine=S.prose>=2?'シネマティックな構図と空気感で。':'';
+  const hi=S.hires?'超高解像度・8K・髪一本一本まで極めて精細にシャープに。':'';
+  let base;
+  if(S.prose===0)base=isPhoto()?'リアルでシャープに。':isAnime()?'綺麗な線の高精細イラストで。':'高品質に。';
+  else if(isPhoto())base='極めて高精細でリアルな実写品質、ピントはシャープに、プロの写真のように。'+cine;
+  else if(isAnime())base='高精細で色鮮やかなアニメイラストとして、線を綺麗に。'+cine;
+  else base='高精細で高品質に。'+cine;
+  return base+hi+QUALDIR_JP;
+}
+function aspectEN(){const map={'1:1':'Square 1:1 framing.','9:16':'Vertical 9:16 framing.','16:9':'Horizontal 16:9 framing.','4:5':'Vertical 4:5 framing.','3:4':'Vertical 3:4 framing.','2:3':'Vertical 2:3 portrait framing.'};return map[S.aspect]||'';}
+function aspectJP(){const a=S.aspect;return a==='1:1'?'正方形(1:1)の構図で。':a==='16:9'?'横長(16:9)の構図で。':'縦長('+a+')の構図で。';}
+
+/* ===== PROSE COMPOSERS ===== */
+/* generic role collectors so packs can add appearance/outfit categories freely */
+function apprEN(){return frag('appearance').filter(o=>o.cat!=='age'&&o.cat!=='ethnicity').map(o=>o.en);}
+function apprJP(){return frag('appearance').filter(o=>o.cat!=='age'&&o.cat!=='ethnicity').map(o=>o.jp);}
+function outExtraEN(){return frag('outfit').filter(o=>o.cat!=='outfit'&&o.cat!=='ocolor').map(o=>o.en);}
+function sceneExtraEN(){return frag('scene').filter(o=>o.cat!=='time').map(o=>o.en);}
+function sceneExtraJP(){return frag('scene').filter(o=>o.cat!=='time').map(o=>o.jp);}
+function withEthEN(eth,sj){if(!eth)return sj;const core=sj.replace(/^(an?)\s+/i,'');const art=/^[aeiou]/i.test(eth.en)?'an':'a';return art+' '+eth.en+' '+core;}
+function outExtraJP(){return frag('outfit').filter(o=>o.cat!=='outfit'&&o.cat!=='ocolor').map(o=>o.jp);}
+
+function proseEN(flux){
+  const med=MEDIA_BY[S.medium]; const P=pron();
+  const PL=(P==='They'); const VB=PL?'have':'has', VBb=PL?'are':'is';
+  const intD=S.intensity===2?'in an exaggerated, highly expressive way':(S.intensity===0?'in a subtle, restrained way':'');
+  const pe=peopleData();
+  const subj=frag('subject').map(o=>o.en);
+  const age=frag2('age')[0];
+  const eth=frag2('ethnicity')[0];
+  const style=frag('style').map(o=>o.en);
+  const body=frag2('body')[0];
+  const skin=frag2('skin').map(o=>o.en);
+  const makeup=frag2('makeup').map(o=>o.en);
+  const hair=hairPhraseEN();
+  const outfit=outfitPhraseEN();
+  const acc=frag('accessory').map(o=>o.en);
+  const prop=frag('prop').map(o=>o.en);
+  const expr=frag2('expr').map(o=>o.en);
+  const gaze=frag2('gaze')[0];
+  const pose=frag('pose').map(o=>o.en);
+  const cam=frag('camera').map(o=>o.en);
+  const light=frag('lighting').map(o=>o.en);
+  const time=frag2('time')[0];
+  const bg=frag('background').map(o=>o.en);
+  const mood=frag('mood').map(o=>o.en);
+  const art=frag2('artstyle')[0];
+  const lk=lockData();
+  const sents=[];
+  let s1=cap(med?med.en:'a portrait');
+  if(pe){const ph=pe.couple?pe.en:(pe.count+' '+(eth?eth.en+' ':'')+pe.noun);s1+=' of '+ph;if(age)s1+=' '+age.en.replace(/\b(her|his)\b/g,"their");}
+  else if(subj.length){s1+=' of '+withEthEN(eth,subj.join(' '));if(age)s1+=' '+age.en;}
+  if(style.length)s1+=', '+style.join(', ');
+  s1+='.';sents.push(s1);
+  if(pe)sents.push('Show them as '+({1:'two',2:'three',3:'several',4:'two'}[pe.n])+' separate, distinct people, each with their own complete, anatomically correct body — exactly two arms and two legs each — clearly spaced apart from one another; do not merge bodies or add any extra or duplicated limbs.');
+  if(S.series)sents.push('This is the exact same person as in the previous image — keep the face, hairstyle, body and outfit perfectly identical, changing only the pose, expression and scene.');
+  if(lk){const parts=[lk.eyes?'with '+lk.eyes:'',lk.hair?lk.hair:'',lk.body?lk.body+' build':'',lk.feat?lk.feat:''].filter(Boolean);
+    sents.push((PL?P+' are consistent recurring characters':P+' is a consistent recurring character')+(lk.name?' named '+lk.name:'')+(parts.length?', '+parts.join(', '):'')+'.');}
+  const desc=apprEN();if(hair)desc.push(hair);
+  let DS=P,DVB=VB,DVBb=VBb;
+  if(pe&&pe.couple){DS='The woman';DVB='has';DVBb='is';}
+  else if(pe){DS='Each of them';DVB='has';DVBb='is';}
+  let s2='';if(desc.length)s2=DS+' '+DVB+' '+desc.join(', ');
+  if(outfit)s2+=(s2?', wearing ':DS+' '+DVBb+' wearing ')+outfit;
+  const withx=[...outExtraEN(),...acc];
+  if(withx.length)s2+=(s2?', with ':DS+' '+DVB+' ')+withx.join(', ');
+  if(s2)sents.push(s2.trim()+'.');
+  {const p2=getv('person2');if(pe&&p2)sents.push(cap(p2)+'.');}
+  const ep=[];if(expr.length)ep.push(expr.join(', '));if(gaze)ep.push(gaze.en);if(pose.length)ep.push(pose.join(', '));
+  if(prop.length)ep.push('holding '+prop.join(' and '));
+  sceneExtraEN().forEach(s=>ep.push(s));
+  if(intD&&(expr.length||pose.length))ep.push(intD);
+  if(ep.length)sents.push(P+' '+VBb+' '+ep.join(', ')+'.');
+  const _pd=pd();const cl=[];if(cam.length)cl.push(cam.join(', '));if(light.length)cl.push(light.join(', '));if(_pd.light)cl.push(_pd.light);const _cn=camNums();if(_cn)cl.push(_cn);if(time)cl.push(time.en);
+  if(cl.length)sents.push(cap(cl.join(', '))+'.');
+  if(bg.length)sents.push('Set against '+bg.join(', ')+'.');
+  let tail='';
+  if(mood.length)tail+=cap(mood.join(', '))+'. ';
+  if(art && (isAnime()||S.medium==='m_water'))tail+='Rendered '+art.en+'. ';
+  tail+=qTailEN(flux)+' '+aspectEN();
+  const fx=fixProseEN();if(fx)tail+=' '+fx;
+  const cp=getv('customPos');if(cp)tail+=' '+cp+'.';
+  if(_pd.material)tail+=' '+_pd.material+'.';
+  const _rp=realProseEN();if(_rp)tail+=' '+_rp;
+  sents.push(tail.trim());
+  {const _ph=prohibitContextEN();if(_ph)sents.push('Strictly avoid: '+_ph);}
+  const free=getv('freeText');if(free)sents.push(free+'.');
+  if(_pd.theme)sents.unshift(_pd.theme.replace(/[。.]$/,'')+'.');
+  return sents.join(' ').replace(/\s+/g,' ').trim();
+}
+function proseJP(){
+  const med=MEDIA_BY[S.medium];
+  const subj=frag('subject').map(o=>o.jp);
+  const age=frag2('age')[0];
+  const eth=frag2('ethnicity')[0];
+  const pe=peopleData();
+  const style=frag('style').map(o=>o.jp);
+  const body=frag2('body')[0];
+  const skin=frag2('skin').map(o=>o.jp);
+  const makeup=frag2('makeup').map(o=>o.jp);
+  const hair=hairPhraseJP();
+  const outfit=outfitPhraseJP();
+  const acc=frag('accessory').map(o=>o.jp);
+  const prop=frag('prop').map(o=>o.jp);
+  const expr=frag2('expr').map(o=>o.jp);
+  const gaze=frag2('gaze')[0];
+  const pose=frag('pose').map(o=>o.jp);
+  const cam=frag('camera').map(o=>o.jp);
+  const light=frag('lighting').map(o=>o.jp);
+  const time=frag2('time')[0];
+  const bg=frag('background').map(o=>o.jp);
+  const mood=frag('mood').map(o=>o.jp);
+  const art=frag2('artstyle')[0];
+  const lk=lockData();const _pd=pd();
+  let out=(med?med.jp:'ポートレート')+'を生成してください。';
+  if(_pd.theme)out+='テーマ：'+_pd.theme+'。';
+  const head=[pe?(eth?eth.jp+'の':'')+pe.jp:(eth?eth.jp+'の':'')+(age?age.jp:'')+subj.join('、'),style.join('、')].filter(Boolean).join('、');
+  if(head)out+=head+'。';
+  if(pe)out+='複数の人物はそれぞれ独立した別人として、全身が解剖学的に正しく（各自、腕は二本・脚は二本）、適度に離れて描いてください。体が融合したり腕や脚が増えたりしないように。';
+  if(S.series)out+='前の画像と完全に同一人物にしてください。顔立ち・髪型・体型・服装はそのまま維持し、ポーズ・表情・場面だけを変えてください。';
+  if(lk){out+='登場人物は一貫した同一キャラクター'+(lk.name?'「'+lk.name+'」':'')+'で、'+[lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean).join('、')+'。';}
+  const desc=[apprJP().join('、'),hair].filter(Boolean).join('、');
+  const DSJ=(pe&&pe.couple)?'女性は':(pe?'それぞれ':'');
+  let body2='';if(desc)body2=DSJ+desc+'の容姿で';
+  if(outfit)body2+=(body2?'、':DSJ)+outfit+'を着ています';
+  const withx=[...outExtraJP(),...acc];
+  if(withx.length)body2+=(body2?'、':'')+withx.join('・')+'を身につけています';
+  if(body2)out+=body2+'。';
+  {const p2=getv('person2');if(pe&&p2)out+=(pe.couple?'男性は':'もう一方は')+p2+'。';}
+  const ep=[expr.join('')+(gaze?gaze.jp:''),pose.join(''),prop.length?prop.join('・')+'を持って':''].filter(Boolean).join('');
+  if(ep)out+=ep+'います。';
+  if(S.intensity!==1&&(expr.length||pose.length))out+=(S.intensity===2?'表情やポーズは大げさで生き生きと表現。':'表情やポーズは控えめに抑えて。');
+  {const sx=sceneExtraJP();if(sx.length)out+='場面は'+sx.join('、')+'。';}
+  const cl=[cam.join('、'),light.join('、'),_pd.light||'',camNums(),time?time.jp:''].filter(Boolean).join('、');
+  if(cl)out+=cl+'。';
+  if(bg.length)out+='背景は'+bg.join('、')+'。';
+  if(mood.length)out+=mood.join('、')+'。';
+  if(art&&(isAnime()||S.medium==='m_water'))out+=art.jp+'で。';
+  out+=qTailJP()+aspectJP();
+  if(_pd.material)out+=_pd.material+'。';
+  const _rp=realProseJP();if(_rp)out+=_rp;
+  const fx=fixProseJP();if(fx)out+=fx;
+  out+='禁止：'+(prohibitContextJP()||'');
+  out=out.replace(/禁止：$/,'');
+  const cp=getv('customPos');if(cp)out+='追加：'+cp+'。';
+  const free=getv('freeText');if(free)out+='追加指示：'+free+'。';
+  return out;
+}
+
+/* ===== tag string ===== */
+function tagString(v){
+  const order=['subject','style','artstyle','appearance','hair','outfit','accessory','prop','expression','pose','camera','lighting','scene','background','mood'];
+  const pe=peopleData();
+  const tags=[];order.forEach(r=>frag(r).forEach(o=>{if(r==='subject'&&pe)return;if(o.tag)tags.push(emphWrap(o.tag,S.emph[o.id],v));}));
+  if(pe)tags.unshift(pe.tag);
+  let lead=leadFor(v,S.qLevel)+medExtra();
+  const lk=lockData();let lkt='';
+  if(lk){const a=[lk.name,lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean);lkt=a.length?a.join(', ')+', ':'';}
+  const fp=fixPosTags();
+  const cp=getv('customPos');
+  const _pd=pd();const pdt=[_pd.light,_pd.material,camNums(),_pd.theme].filter(Boolean).join(', ');
+  const rp2=realPosTags();
+  let body=tags.join(', ');
+  const intT=S.intensity===2?'exaggerated expression, dynamic pose':(S.intensity===0?'subtle expression, relaxed pose':'');
+  const serT=S.series?'consistent character, same face, identical outfit and hairstyle':'';
+  const p2t=(pe&&getv('person2'))?getv('person2'):'';
+  let full=lead+lkt+body+(fp?', '+fp:'')+(rp2?', '+rp2:'')+(pdt?', '+pdt:'')+(cp?', '+cp:'')+(p2t?', '+p2t:'')+(intT?', '+intT:'')+(serT?', '+serT:'')+(S.hires?', 8k, ultra high res, extremely detailed, absurdres':'');
+  if(v==='nai')full+=naiTail(S.qLevel);
+  return full.replace(/,\s*,/g,', ').replace(/\s+/g,' ').replace(/^,\s*/,'').replace(/,\s*$/,'').trim();
+}
+
+/* ===== midjourney ===== */
+function mjString(model){
+  const core=proseEN(true).replace(/\s+/g,' ').replace(/\.$/,'').trim();
+  let params=' --ar '+S.aspect;
+  if(model.niji){params+=' --niji 6';}
+  else{
+    if(isAnime())params+=' --niji 6';
+    if(document.getElementById('mjRaw').checked && !isAnime())params+=' --style raw';
+  }
+  const sv=document.getElementById('mjS').value, cv=document.getElementById('mjC').value, wv=document.getElementById('mjW').value, qv=document.getElementById('mjQ').value;
+  params+=' --s '+sv;
+  if(+cv>0)params+=' --chaos '+cv;
+  if(+wv>0)params+=' --weird '+wv;
+  if(qv)params+=' --q '+qv;
+  if(document.getElementById('mjTile').checked)params+=' --tile';
+  const sref=getv('mjSref');if(sref)params+=' --sref '+sref;
+  const cref=getv('mjCref');if(cref)params+=' --cref '+cref+' --cw 100';
+  const seed=getv('seed');if(seed)params+=' --seed '+seed;
+  const lk=lockData();if(lk)params+=' --cw 100';
+  const neg=[];if(isPhoto())neg.push('illustration','anime','3d');if(isAnime())neg.push('photo','realistic','3d');
+  if(S.fixes.hands)neg.push('deformed hands','extra fingers');if(S.fixes.clean)neg.push('clutter');
+  const cn=getv('customNeg');if(cn)neg.push(cn);
+  const pe=peopleData();if(pe)neg.push('extra arms','extra legs','extra limbs','fused bodies','conjoined','deformed','mutated hands');
+  if(neg.length)params+=' --no '+neg.join(', ');
+  return core+params;
+}
+
+/* ===== STRUCTURED (headed) format for instruction-following models ===== */
+function negProseJP(){
+  const f=S.fixes; const p=['プラスチックのような肌','ワックスのような質感','過度な肌補正','不自然な顔','アンキャニーバレー','解剖学的エラー','指の歪み','余分な手足','不自然なプロポーション','衣装の破綻','布の溶け','柄崩れ','顔の複製','硬直したポーズ','彩度過多','アニメ調発色','フラットな照明','ぼやけた顔','低解像度','JPEGノイズ'];
+  if(f.hands)p.push('余分または欠けた指、手指の破綻');
+  if(f.face)p.push('崩れた顔、左右非対称の目');
+  if(f.sharp)p.push('ぼやけ、ピンボケ');
+  if(f.clean)p.push('余計な物の写り込み');
+  p.push('光源と矛盾する影','文字化け、ロゴ、透かし','余分な人物');
+  const cn=getv('customNeg'); if(cn)p.push(cn);
+  return p.join('、')+'。';
+}
+function negProseEN(){
+  const f=S.fixes; const p=['plastic-looking skin','waxy texture','over-retouched skin','unnatural face','uncanny valley','anatomical errors','distorted fingers','extra limbs','unnatural proportions','broken clothing','melted fabric','warped patterns','duplicated face','stiff pose','oversaturation','flat lighting','blurry face','low resolution','jpeg artifacts'];
+  if(f.hands)p.push('extra or missing fingers, malformed hands');
+  if(f.face)p.push('deformed or asymmetrical eyes');
+  if(f.sharp)p.push('blur or out-of-focus areas');
+  if(f.clean)p.push('clutter or extra objects');
+  p.push('shadows inconsistent with the light source','garbled text, logos, watermarks','extra people');
+  const cn=getv('customNeg'); if(cn)p.push(cn);
+  return 'Avoid: '+p.join(', ')+'.';
+}
+function sectionsJoinJP(B){return B.filter(b=>b[1]&&b[1].trim()).map(b=>b[0]+'：\n'+b[1].trim()).join('\n\n');}
+function sectionsJoinEN(B){return B.filter(b=>b[1]&&b[1].trim()).map(b=>b[0]+':\n'+b[1].trim()).join('\n\n');}
+function structJP(){
+  const med=MEDIA_BY[S.medium];
+  const subj=frag('subject').map(o=>o.jp).join('、');
+  const age=frag2('age')[0]; const ageJ=age?age.jp:''; const eth=frag2('ethnicity')[0]; const ethJ=eth?eth.jp+'の':''; const pe=peopleData();
+  const style=frag('style').map(o=>o.jp).join('、');
+  const body=frag2('body')[0]; const skin=frag2('skin').map(o=>o.jp).join('、'); const makeup=frag2('makeup').map(o=>o.jp).join('、');
+  const hair=hairPhraseJP(); const outfit=outfitPhraseJP();
+  const acc=frag('accessory').map(o=>o.jp).join('・'); const prop=frag('prop').map(o=>o.jp).join('・');
+  const expr=frag2('expr').map(o=>o.jp).join(''); const gaze=frag2('gaze')[0]; const gazeJ=gaze?gaze.jp:'';
+  const pose=frag('pose').map(o=>o.jp).join('');
+  const comp=frag('camera').filter(o=>o.cat==='comp').map(o=>o.jp).join('、');
+  const lens=frag('camera').filter(o=>o.cat==='lens').map(o=>o.jp).join('、');
+  const light=frag('lighting').map(o=>o.jp).join('、'); const time=frag2('time')[0]; const timeJ=time?time.jp:'';
+  const bg=frag('background').map(o=>o.jp).join('、'); const mood=frag('mood').map(o=>o.jp).join('、');
+  const art=frag2('artstyle')[0]; const artJ=art?art.jp:''; const lk=lockData(); const _pd=pd();
+  const B=[];
+  let shudai=(med?med.jp:'ポートレート'); if(style)shudai+='、'+style; if(pe)shudai+='の'+(eth?eth.jp+'の':'')+pe.jp; else if(subj)shudai+='の'+ethJ+ageJ+subj; if(bg)shudai+='。'+bg+'を背景にしたシーン';
+  B.push(['主題', (_pd.theme?_pd.theme+'。':'')+shudai+'。']);
+  let jb='';
+  if(lk)jb+='一貫した同一人物'+(lk.name?'「'+lk.name+'」':'')+'（'+[lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean).join('、')+'）。';
+  const jbody=[pe?(eth?eth.jp+'の':'')+pe.jp:ethJ+ageJ+(subj||'女性'),apprJP().join('、'),hair].filter(Boolean).join('、'); if(jbody)jb+=jbody+'。'; if(pe)jb+='各人物は独立した別人として全身を正しい解剖で（腕二本・脚二本）、離して描写。体の融合や余分な手足を避ける。'; {const p2=getv('person2');if(pe&&p2)jb+=(pe.couple?'男性は':'もう一方は')+p2+'。';}
+  const exline=expr+gazeJ; if(exline)jb+='表情は'+exline+'。明確に成人した人物。';
+  else jb+='明確に成人した人物。';
+  B.push(['人物・表情', jb]);
+  let fp=''; if(outfit)fp+=outfit+'をまとう'; const wj=[...outExtraJP(),...frag('accessory').map(o=>o.jp)]; if(wj.length)fp+=(fp?'。':'')+wj.join('・')+'を身につける'; if(fp)fp+='。';
+  const pl=[pose,prop?prop+'を持つ':''].filter(Boolean).join('、'); if(pl)fp+=pl+'。';
+  B.push(['服装・ポーズ', fp]);
+  let hl=''; if(bg)hl+=bg+'。'; const li=[light,_pd.light||'',timeJ].filter(Boolean).join('、'); if(li)hl+=li+'。'; {const sx=sceneExtraJP();if(sx.length)hl+='場面は'+sx.join('、')+'。';}
+  B.push(['背景・光', hl]);
+  let kz='縦横比'+S.aspect+'。'; if(comp)kz+=comp+'。'; if(lens)kz+=lens+'。'; const _cn=camNums(); if(_cn)kz+=_cn+'。';
+  B.push(['構図・カメラ', kz]);
+  let sk=qTailJP(); if(artJ)sk+=artJ+'。'; if(_pd.material)sk+=_pd.material+'。'; if(mood)sk+=mood+'。';
+  B.push(['質感・スタイル', sk]);
+  const _rp=realProseJP(); if(_rp)B.push(['自然性・実在感', _rp]);
+  const etc=[getv('customPos'),getv('freeText')].filter(Boolean).join('、'); if(etc)B.push(['その他', etc+'。']);
+  B.push(['避けたい要素（品質）', negProseJP()]);
+  B.push(['禁止要素（構図・文脈）', prohibitContextJP()]);
+  return sectionsJoinJP(B);
+}
+function structEN(){
+  const med=MEDIA_BY[S.medium];
+  const subj=frag('subject').map(o=>o.en).join(', ');
+  const age=frag2('age')[0]; const ageE=age?(pron()==='They'?age.en.replace(/\b(her|his)\b/g,"their"):age.en):''; const eth=frag2('ethnicity')[0]; const ethE=eth?eth.en+' ':''; const pe=peopleData();
+  const style=frag('style').map(o=>o.en).join(', ');
+  const body=frag2('body')[0]; const skin=frag2('skin').map(o=>o.en).join(', '); const makeup=frag2('makeup').map(o=>o.en).join(', ');
+  const hair=hairPhraseEN(); const outfit=outfitPhraseEN();
+  const acc=frag('accessory').map(o=>o.en).join(' and '); const prop=frag('prop').map(o=>o.en).join(' and ');
+  const expr=frag2('expr').map(o=>o.en).join(', '); const gaze=frag2('gaze')[0]; const gazeE=gaze?gaze.en:'';
+  const pose=frag('pose').map(o=>o.en).join(', ');
+  const comp=frag('camera').filter(o=>o.cat==='comp').map(o=>o.en).join(', ');
+  const lens=frag('camera').filter(o=>o.cat==='lens').map(o=>o.en).join(', ');
+  const light=frag('lighting').map(o=>o.en).join(', '); const time=frag2('time')[0]; const timeE=time?time.en:'';
+  const bg=frag('background').map(o=>o.en).join(', '); const mood=frag('mood').map(o=>o.en).join(', ');
+  const art=frag2('artstyle')[0]; const artE=art?art.en:''; const lk=lockData(); const _pd=pd();
+  const B=[];
+  let s1=cap(med?med.en:'a portrait'); if(style)s1+=', '+style; if(pe)s1+=', featuring '+(pe.couple?pe.en:pe.count+' '+ethE+pe.noun)+(ageE?', '+ageE:''); else if(subj)s1+=', featuring '+withEthEN(eth,subj)+(ageE?', '+ageE:''); if(bg)s1+='. Scene: '+bg;
+  B.push(['Subject', (_pd.theme?_pd.theme+'. ':'')+s1+'.']);
+  let mm=''; if(lk){const parts=[lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean);mm+='A consistent recurring character'+(lk.name?' named '+lk.name:'')+(parts.length?' ('+parts.join(', ')+')':'')+'. ';}
+  const mb=[pe?cap(pe.couple?pe.en:pe.count+' '+pe.noun):(ageE?cap(ageE):''),apprEN().join(', '),hair].filter(Boolean).join(', '); if(mb)mm+=cap(mb)+'. '; if(pe)mm+='Render them as separate, distinct people, each with a complete, anatomically correct body (two arms and two legs each), clearly spaced apart; no merged bodies or extra limbs. '; {const p2=getv('person2');if(pe&&p2)mm+=cap(p2)+'. ';}
+  const ex=[expr,gazeE].filter(Boolean).join(', '); mm+=(ex?'Expression: '+ex+'. ':'')+'Clearly an adult.';
+  B.push(['Model & expression', mm]);
+  let wp=''; if(outfit)wp+='Wearing '+outfit; const we=[...outExtraEN(),...frag('accessory').map(o=>o.en)]; if(we.length)wp+=(wp?', with ':'With ')+we.join(', '); if(wp)wp+='. ';
+  const pp=[pose,prop?'holding '+prop:''].filter(Boolean).join(', '); if(pp)wp+=cap(pp)+'.';
+  B.push(['Wardrobe & pose', wp]);
+  let sl=''; if(bg)sl+=cap(bg)+'. '; const li=[light,_pd.light,timeE].filter(Boolean).join(', '); if(li)sl+=cap(li)+'.'; {const sx=sceneExtraEN();if(sx.length)sl+=' '+cap(sx.join(', '))+'.';}
+  B.push(['Setting & light', sl]);
+  let cc='Aspect ratio '+S.aspect+'. '; if(comp)cc+=cap(comp)+'. '; if(lens)cc+=cap(lens)+'. '; const _cn=camNums(); if(_cn)cc+=_cn+'.';
+  B.push(['Composition & camera', cc]);
+  let ts=qTailEN(false)+' '; if(artE)ts+='Rendered '+artE+'. '; if(_pd.material)ts+=_pd.material+'. '; if(mood)ts+=cap(mood)+'.';
+  B.push(['Texture & style', ts]);
+  const _rp=realProseEN(); if(_rp)B.push(['Realism / natural look', _rp]);
+  const notes=[getv('customPos'),getv('freeText')].filter(Boolean).join('; '); if(notes)B.push(['Notes', notes+'.']);
+  B.push(['Negative — quality', negProseEN()]);
+  {const _ph=prohibitContextEN();if(_ph)B.push(['Prohibited — composition & context', 'Strictly avoid: '+_ph]);}
+  return sectionsJoinEN(B);
+}
+
+/* ===== build dispatch ===== */
+/* ===== pack-mode helpers ===== */
+function personMode(){return !(PACK.phrasing&&PACK.phrasing.person===false);}
+const GORDER=['subject','style','artstyle','appearance','hair','attire','outfit','accessory','prop','expression','pose','camera','lighting','scene','background','mood'];
+function genericProseEN(flux){
+  const med=MEDIA_BY[S.medium];const _pd=pd();
+  const parts=[];GORDER.forEach(r=>frag(r).forEach(o=>{if(o.en)parts.push(o.en);}));
+  let s=cap(med?med.en:'an image');
+  if(parts.length)s+=' of '+parts.join(', ');
+  s+='.';
+  const extra=[_pd.light,camNums(),_pd.material].filter(Boolean).join(', ');if(extra)s+=' '+cap(extra)+'.';
+  s+=' '+qTailEN(flux)+' '+aspectEN();
+  const rp=realProseEN();if(rp)s+=' '+rp;
+  const cp=getv('customPos');if(cp)s+=' '+cp+'.';
+  const free=getv('freeText');if(free)s+=' '+free+'.';
+  if(_pd.theme)s=_pd.theme.replace(/[。.]$/,'')+'. '+s;
+  const ph=prohibitContextEN();if(ph)s+=' Strictly avoid: '+ph;
+  return s.replace(/\s+/g,' ').trim();
+}
+function genericProseJP(flux){
+  const med=MEDIA_BY[S.medium];const _pd=pd();
+  const parts=[];GORDER.forEach(r=>frag(r).forEach(o=>{if(o.jp)parts.push(o.jp);}));
+  let s=(med?med.jp:'画像')+'を生成してください。';
+  if(_pd.theme)s='テーマ：'+_pd.theme+'。'+s;
+  if(parts.length)s+=parts.join('、')+'。';
+  const extra=[_pd.light,camNums(),_pd.material].filter(Boolean).join('、');if(extra)s+=extra+'。';
+  s+=qTailJP()+aspectJP();
+  const rp=realProseJP();if(rp)s+=rp;
+  const cp=getv('customPos');if(cp)s+='追加：'+cp+'。';
+  const free=getv('freeText');if(free)s+='追加指示：'+free+'。';
+  const ph=prohibitContextJP();if(ph)s+='禁止：'+ph;
+  return s;
+}
+function setBranding(){
+  const M=PACK.meta||{};
+  if(M.docTitle)document.title=M.docTitle;
+  if(M.accent){const r=document.documentElement;if(r&&r.style){const a=M.accent;if(a.p)r.style.setProperty('--primary',a.p);if(a.d)r.style.setProperty('--primary-d',a.d);if(a.s)r.style.setProperty('--primary-soft',a.s);if(a.glow)r.style.setProperty('--glow',a.glow);if(a.glowSoft)r.style.setProperty('--glow-soft',a.glowSoft);}}
+  const set=(id,html)=>{const e=document.getElementById(id);if(e&&html!=null)e.innerHTML=html;};
+  set('appTitle',M.h1);set('appLead',M.lead);set('modelGuide',M.guide);set('appFoot',M.foot);set('appVer',M.ver);
+}
+
+/* ===== CHARACTER SHEET (multi-view reference sheet) ===== */
+const SHEETD=[{id:'face',label:'顔アップ'},{id:'hands',label:'手元'},{id:'shoes',label:'靴'},{id:'acc',label:'アクセ'}];
+function buildSheetToggles(){const host=document.getElementById('sheetDetails');if(!host)return;SHEETD.forEach(t=>{const lab=el('label','toggle'+(S.sheet[t.id]?' on':''));const inp=el('input');inp.type='checkbox';inp.checked=!!S.sheet[t.id];inp.dataset.sheet=t.id;inp.onchange=()=>{S.sheet[t.id]=inp.checked;lab.classList.toggle('on',inp.checked);render();};lab.appendChild(inp);lab.appendChild(document.createTextNode(' '+t.label));host.appendChild(lab);});}
+function identityListEN(){
+  const age=frag2('age')[0];
+  const subj=frag('subject').map(o=>o.en).join(' ');
+  const eth=frag2('ethnicity')[0];
+  const style=frag('style').map(o=>o.en).join(', ');
+  const hair=hairPhraseEN(),outfit=outfitPhraseEN();
+  const a=[];let who=withEthEN(eth,(subj||'a character'));if(age)who+=' '+(pron()==='They'?age.en.replace(/\b(her|his)\b/g,"their"):age.en);if(style)who+=', '+style;a.push(who);
+  const feat=[apprEN().join(', '),hair].filter(Boolean).join(', ');if(feat)a.push(feat);
+  if(outfit)a.push('wearing '+outfit);
+  const wx=[...outExtraEN(),...frag('accessory').map(o=>o.en)];if(wx.length)a.push('with '+wx.join(', '));
+  const lk=lockData();if(lk){const p=[lk.name?'named '+lk.name:'',lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean).join(', ');if(p)a.push('('+p+')');}
+  return a;
+}
+function identityListJP(){
+  const age=frag2('age')[0];
+  const subj=frag('subject').map(o=>o.jp).join('、');
+  const eth=frag2('ethnicity')[0];
+  const style=frag('style').map(o=>o.jp).join('、');
+  const hair=hairPhraseJP(),outfit=outfitPhraseJP();
+  const a=[];a.push((eth?eth.jp+'の':'')+(age?age.jp:'')+(subj||'キャラクター')+(style?'、'+style:''));
+  const feat=[apprJP().join('、'),hair].filter(Boolean).join('、');if(feat)a.push(feat+'の容姿');
+  if(outfit)a.push(outfit+'を着用');
+  const wx=[...outExtraJP(),...frag('accessory').map(o=>o.jp)];if(wx.length)a.push(wx.join('・')+'を着用');
+  const lk=lockData();if(lk){const p=[lk.name?'「'+lk.name+'」':'',lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean).join('、');if(p)a.push('（'+p+'）');}
+  return a;
+}
+function sheetProseEN(){
+  const med=MEDIA_BY[S.medium],sh=S.sheet||{};
+  const base=isPhoto()?'ultra-realistic and photographic, shot like a high-end DSLR':(isAnime()?'in a clean anime model-sheet style':('in the style of '+(med?med.en:'')));
+  let s='A full-body character reference sheet, '+base+', of '+identityListEN().join(', ')+', on a pure white, shadowless background.';
+  if(sh.face)s+=' Lay it out clearly in two zones: on the left, a large face close-up showing the eyes, eyebrows, skin texture and individual strands of hair in sharp detail; on the right, a full-body turnaround of the exact same character — front view, side view and back view, evenly spaced.';
+  else s+=' Show a full-body turnaround of the exact same character — front view, side view and back view, evenly spaced.';
+  s+=' Keep the face, hairstyle, outfit and body type perfectly identical across every view.';
+  const det=[];if(sh.hands)det.push('hand details');if(sh.shoes)det.push('shoe details');if(sh.acc)det.push('accessory details');
+  if(det.length)s+=' Add small detail callouts: '+det.join(', ')+'.';
+  s+=' Soft, even, shadowless studio lighting. Clean, simple, readable reference-sheet layout in a wide format that emphasizes the character\'s features and the texture of the outfit.';
+  s+=' '+qTailEN(false);
+  const rp=realProseEN();if(rp)s+=' '+rp;
+  const cp=getv('customPos');if(cp)s+=' '+cp+'.';
+  const free=getv('freeText');if(free)s+=' '+free+'.';
+  const ph=prohibitContextEN();if(ph)s+=' Strictly avoid: '+ph;
+  return s.replace(/\s+/g,' ').trim();
+}
+function sheetProseJP(){
+  const med=MEDIA_BY[S.medium],sh=S.sheet||{};
+  const base=isPhoto()?'超リアルな実写のキャラクター設定資料（高級一眼レフで撮影したような質感）':(isAnime()?'アニメ調のキャラクター設定資料（モデルシート）':('キャラクター設定資料（'+(med?med.jp:'')+'）'));
+  let s='白背景（無影でクリーン）の全身キャラクターシートを生成してください。'+base+'。被写体は'+identityListJP().join('、')+'。';
+  if(sh.face)s+='レイアウトは二分割：左に顔のアップ詳細（眉目・肌質・髪の毛一本一本までクリア）、右に同一人物の三視図（正面全身・側面全身・背面全身）を均等配置。';
+  else s+='同一人物の三視図（正面全身・側面全身・背面全身）を均等配置。';
+  s+='顔立ち・髪型・服装・体型をすべてのビューで完全に一致させる。';
+  const det=[];if(sh.hands)det.push('手元');if(sh.shoes)det.push('靴');if(sh.acc)det.push('アクセサリー');
+  if(det.length)s+=det.join('・')+'のディテールを小さく別途配置。';
+  s+='柔らかく均一な無影のソフトライト。資料性を重視したシンプルで見やすい横長レイアウトで、人物の美貌と着こなしの質感を強調。';
+  s+=qTailJP();
+  const rp=realProseJP();if(rp)s+=rp;
+  const cp=getv('customPos');if(cp)s+='追加：'+cp+'。';
+  const free=getv('freeText');if(free)s+='追加指示：'+free+'。';
+  const ph=prohibitContextJP();if(ph)s+='禁止：'+ph;
+  return s;
+}
+function sheetTagString(v){
+  const ident=[];['subject','style','appearance','hair','outfit','accessory','artstyle'].forEach(r=>frag(r).forEach(o=>{if(o.tag)ident.push(o.tag);}));
+  const sh=S.sheet||{};
+  const st=['character sheet','reference sheet','character turnaround','multiple views','full body','front view','side view','back view','three-quarter view','(white background:1.2)','simple background','studio lighting','soft even lighting','character design','model sheet','same character','consistent design','highly detailed'];
+  if(sh.face)st.push('face close-up');if(sh.hands)st.push('hand focus');if(sh.shoes)st.push('shoe focus');
+  const lead=leadFor(v,S.qLevel)+medExtra();const rp=realPosTags();
+  const lk=lockData();let lkt='';if(lk){const a=[lk.name,lk.eyes,lk.hair,lk.body,lk.feat].filter(Boolean);lkt=a.length?a.join(', ')+', ':'';}
+  let full=lead+lkt+ident.join(', ')+', '+st.join(', ')+(rp?', '+rp:'')+(S.hires?', 8k, ultra high res, extremely detailed, absurdres':'');
+  if(v==='nai')full+=naiTail(S.qLevel);
+  return full.replace(/,\s*,/g,', ').replace(/\s+/g,' ').replace(/^,\s*/,'').replace(/,\s*$/,'').trim();
+}
+function sheetMJ(model){
+  const core=sheetProseEN().replace(/\s+/g,' ').replace(/\.$/,'').trim();
+  let params=' --ar 16:9';
+  if(model.niji||isAnime())params+=' --niji 6';
+  const sv=document.getElementById('mjS').value;params+=' --s '+sv;
+  if(document.getElementById('mjRaw').checked&&!isAnime())params+=' --style raw';
+  const seed=getv('seed');if(seed)params+=' --seed '+seed;
+  const lk=lockData();if(lk)params+=' --cw 100';
+  return core+params;
+}
+
+function build(modelId){
+  const m=MODELS.find(x=>x.id===modelId);
+  if(S.sheet&&S.sheet.on){
+    if(m.fam==='prose'||m.fam==='flux')return{pos:(S.lang==='jp'?sheetProseJP():sheetProseEN()),neg:''};
+    if(m.fam==='mj')return{pos:sheetMJ(m),neg:''};
+    return{pos:sheetTagString(m.variant),neg:negTags(m.variant)};
+  }
+  if(m.fam==='prose'||m.fam==='flux'){
+    if(personMode()){
+      if(S.proseStyle===1)return{pos:(S.lang==='jp'?structJP():structEN()),neg:''};
+      return{pos:(S.lang==='jp'?proseJP():proseEN(m.fam==='flux')),neg:''};
+    }
+    return{pos:(S.lang==='jp'?genericProseJP(m.fam==='flux'):genericProseEN(m.fam==='flux')),neg:''};
+  }
+  if(m.fam==='mj')return{pos:mjString(m),neg:''};
+  return{pos:tagString(m.variant),neg:negTags(m.variant)};
+}
+
+/* ===== RENDER ===== */
+function resFor(m){if(m.fam!=='tag')return '';const base=m.variant==='sd15'?RES512:RES1024;return base[S.aspect]||'';}
+const LOCKTIP={
+ gpt:'GPT Image 2：容姿の核を毎回文中に明記。生成後「同じ人物のまま」と会話で指示すると近づきます。',
+ nano:'Nano Banana Pro：1枚目を添付し「同じ顔・同じ人物のまま衣装だけ変えて」で高い一貫性。',
+ imagen:'Imagen 4：容姿描写を毎回そろえ、同じシード/参照で寄せます。',
+ flux:'FLUX.2：同じSeed＋同じ容姿記述で近づけます。完全固定はLoRA作成が確実。',
+ seedream:'Seedream：参照画像＋同一記述で寄せます。',
+ ideogram:'Ideogram：容姿の核を文中で固定。',
+ recraft:'Recraft：スタイル設定を固定し記述をそろえます。',
+ qwen:'Qwen-Image：Seed固定＋同一記述で寄せます。',
+ sd35:'SD 3.5：Seed固定＋同一記述。LoRA作成が最も確実。',
+ mj:'Midjourney：基準画像のURLを --cref に渡し --cw 100 で顔を固定します。',
+ niji:'niji：基準画像URLを --cref ＋ --cw 100。スタイルは --sref で固定。',
+ nai:'NovelAI：Vibe Transfer / Character Reference で一貫性を確保できます。',
+ illust:'Illustrious：Seed固定＋同一タグ。完全固定は専用LoRAが確実。',
+ noob:'NoobAI：Seed固定＋同一タグ。V-pred設定をそろえて。',
+ animagine:'Animagine：Seed固定＋同一タグ。完全固定は専用LoRA推奨。',
+ pony:'Pony：Seed固定＋同一タグ。完全固定は専用LoRA推奨。',
+ sdxl:'SDXL：Seed固定＋同一タグ。ReActor等の顔固定拡張も有効。',
+ sd15:'SD1.5：Seed固定＋同一タグ。ReActor等の顔固定拡張も有効。'
+};
+function render(){
+  document.getElementById('mjSv').textContent=document.getElementById('mjS').value;
+  document.getElementById('mjCv').textContent=document.getElementById('mjC').value;
+  document.getElementById('mjWv').textContent=document.getElementById('mjW').value;
+  ['mjRaw','mjTile','lockOn'].forEach(id=>{const e=document.getElementById(id);if(e&&e.parentElement)e.parentElement.classList.toggle('on',e.checked);});
+  {const so=document.getElementById('sheetOn');if(so&&S.sheet){S.sheet.on=so.checked;if(so.parentElement)so.parentElement.classList.toggle('on',so.checked);}}
+  {const h=document.getElementById('hires');if(h){S.hires=h.checked;if(h.parentElement)h.parentElement.classList.toggle('on',h.checked);}}
+  {const sr=document.getElementById('seriesOn');if(sr){S.series=sr.checked;if(sr.parentElement)sr.parentElement.classList.toggle('on',sr.checked);}}
+  const m=MODELS.find(x=>x.id===S.model);
+  const r=build(S.model);
+  document.getElementById('outModelName').innerHTML=m.name+' <small>'+m.sub+'</small>';
+  document.getElementById('outPos').value=r.pos;
+  const negWrap=document.getElementById('negWrap');
+  if(m.neg===true){negWrap.style.display='';document.getElementById('outNeg').value=r.neg;}
+  else negWrap.style.display='none';
+  const res=resFor(m);
+  document.getElementById('outMeta').innerHTML='<b>推奨設定</b>：'+m.set+(res?'　/　解像度の目安 '+res:'');
+  let _tip='💡 '+m.tip;
+  if(S.sheet&&S.sheet.on)_tip='📋 キャラクターシート出力中。'+(m.fam==='tag'?'タグ系は複数アングルの配置精度が落ちます。GPT Image 2 / Imagen / Nano Banana / Midjourney 推奨。':'このモデルはレイアウト追従が得意です。')+'　'+_tip;
+  document.getElementById('outTip').textContent=_tip;
+  document.getElementById('lockTip').textContent='🔑 '+(LOCKTIP[S.model]||LOCKTIP.sdxl);
+  document.getElementById('mjShell').style.opacity=(m.fam==='mj')?'1':'.55';
+  renderEmph();
+  renderSelSummary();
+  {const lmel=document.getElementById('lenMeta');if(lmel)lmel.innerHTML=lenMeta(r,m);}
+}
+
+/* ===== COPY ===== */
+async function doCopy(text){
+  try{await navigator.clipboard.writeText(text);return true;}
+  catch(e){try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');document.body.removeChild(ta);return ok;}catch(_){return false;}}
+}
+async function copyField(id){const v=document.getElementById(id).value;const ok=await doCopy(v);if(ok&&id==='outPos'){const m=MODELS.find(x=>x.id===S.model);pushHistory(m.name,v);}flash(document.getElementById('mainCopy'),ok?'✅ コピーしました':'⚠ 手動でコピーしてください');}
+async function copyAll(){
+  let out='';
+  MODELS.forEach(m=>{const r=build(m.id);out+='=== '+m.name+' ('+m.sub+') ===\n'+r.pos+'\n';if(m.neg===true)out+='[Negative]\n'+r.neg+'\n';out+='\n';});
+  const ok=await doCopy(out);flash(document.querySelector('.btn-all'),ok?'✅ 全モデル分をコピーしました':'⚠ 手動でコピーしてください');
+}
+function flash(btn,msg){const o=btn.textContent,bg=btn.style.background;btn.textContent=msg;btn.style.background=msg.startsWith('✅')?'#28a745':'#e0a800';btn.style.color='#fff';setTimeout(()=>{btn.textContent=o;btn.style.background=bg;btn.style.color='';},1600);}
+
+/* ===== SETTINGS SAVE / LOAD ===== */
+function collectState(){
+  syncSel();
+  return JSON.stringify({
+    sel:[...S.sel],medium:S.medium,aspect:S.aspect,lang:S.lang,model:S.model,
+    qLevel:S.qLevel,prose:S.prose,neg:S.neg,proseStyle:S.proseStyle,emph:S.emph,real:S.real,sheet:S.sheet,hires:S.hires,intensity:S.intensity,series:S.series,people:S.people,fixes:S.fixes,free:getv('freeText'),
+    adv:{mjS:getv('mjS'),mjC:getv('mjC'),mjW:getv('mjW'),mjQ:getv('mjQ'),mjRaw:document.getElementById('mjRaw').checked,mjTile:document.getElementById('mjTile').checked,mjSref:getv('mjSref'),mjCref:getv('mjCref'),seed:getv('seed'),person2:getv('person2'),cpos:getv('customPos'),cneg:getv('customNeg'),pdT:getv('pdTheme'),pdL:getv('pdLight'),pdM:getv('pdMaterial'),pdA:getv('pdAperture'),pdI:getv('pdISO'),pdS:getv('pdShutter')},
+    lock:{on:document.getElementById('lockOn').checked,name:getv('lkName'),eyes:getv('lkEyes'),hair:getv('lkHair'),body:getv('lkBody'),feat:getv('lkFeat')}
+  });
+}
+function openSettings(){
+  const cur=collectState();
+  let t=null;
+  try{t=prompt('現在の設定（コピーして保存）。\n別の設定を貼り付けて読み込むこともできます：',cur);}
+  catch(e){alert&&alert('この環境ではダイアログが使えません。設定:\n'+cur);return;}
+  if(t&&t.trim()&&t.trim()!==cur){try{loadState(JSON.parse(t.trim()));}catch(e){try{alert('読み込めませんでした。設定テキストを確認してください。');}catch(_){}}}
+}
+const SEGIDS={qLevel:'qSeg',prose:'proseSeg',neg:'negSeg',proseStyle:'styleSeg',intensity:'intSeg',people:'peopleSeg'};
+function setSeg(key,val){S[key]=val;const host=document.getElementById(SEGIDS[key]);if(host)[...host.children].forEach((c,j)=>c.classList.toggle('on',j===val));}
+function setChk(id,on){const e=document.getElementById(id);if(e){e.checked=!!on;if(e.parentElement)e.parentElement.classList.toggle('on',!!on);}}
+function setVal(id,v){const e=document.getElementById(id);if(e)e.value=(v!=null?v:'');}
+function loadState(o){
+  document.querySelectorAll('.tag-input').forEach(x=>x.checked=false);
+  (o.sel||[]).forEach(id=>setChecked(id,true));
+  if(o.medium){S.medium=o.medium;setChk('medium_'+o.medium,true);}
+  if(o.aspect){S.aspect=o.aspect;setChk('aspect_'+o.aspect,true);}
+  if(o.lang){S.lang=o.lang;setChk('lang_'+o.lang,true);}
+  if(o.model){S.model=o.model;selectModelBtn();}
+  if(o.qLevel!=null)setSeg('qLevel',o.qLevel);
+  if(o.prose!=null)setSeg('prose',o.prose);
+  if(o.neg!=null)setSeg('neg',o.neg);
+  if(o.proseStyle!=null)setSeg('proseStyle',o.proseStyle);
+  S.emph=o.emph||{};
+  if(o.real){S.real=o.real;Object.keys(o.real).forEach(k=>{const i=document.querySelector('input[data-real="'+k+'"]');if(i){i.checked=o.real[k];if(i.parentElement)i.parentElement.classList.toggle('on',o.real[k]);}});}
+  if(o.sheet){S.sheet=o.sheet;setChk('sheetOn',o.sheet.on);Object.keys(o.sheet).forEach(k=>{if(k==='on')return;const i=document.querySelector('input[data-sheet="'+k+'"]');if(i){i.checked=o.sheet[k];if(i.parentElement)i.parentElement.classList.toggle('on',o.sheet[k]);}});}
+  if(o.hires!=null){S.hires=o.hires;setChk('hires',o.hires);}
+  if(o.intensity!=null)setSeg('intensity',o.intensity);
+  if(o.people!=null)setSeg('people',o.people);
+  if(o.series!=null){S.series=o.series;setChk('seriesOn',o.series);}
+  if(o.fixes){S.fixes=o.fixes;Object.keys(o.fixes).forEach(k=>document.querySelectorAll('input[data-fix="'+k+'"]').forEach(x=>{x.checked=o.fixes[k];if(x.parentElement)x.parentElement.classList.toggle('on',o.fixes[k]);}));}
+  if(o.free!=null)setVal('freeText',o.free);
+  if(o.adv){const a=o.adv;setVal('mjS',a.mjS||150);setVal('mjC',a.mjC||0);setVal('mjW',a.mjW||0);setVal('mjQ',a.mjQ||'1');setChk('mjRaw',a.mjRaw);setChk('mjTile',a.mjTile);setVal('mjSref',a.mjSref);setVal('mjCref',a.mjCref);setVal('seed',a.seed);setVal('person2',a.person2);setVal('customPos',a.cpos);setVal('customNeg',a.cneg);setVal('pdTheme',a.pdT);setVal('pdLight',a.pdL);setVal('pdMaterial',a.pdM);setVal('pdAperture',a.pdA);setVal('pdISO',a.pdI);setVal('pdShutter',a.pdS);}
+  if(o.lock){setChk('lockOn',o.lock.on);setVal('lkName',o.lock.name);setVal('lkEyes',o.lock.eyes);setVal('lkHair',o.lock.hair);setVal('lkBody',o.lock.body);setVal('lkFeat',o.lock.feat);}
+  syncSel();render();
+}
+
+/* ===== pro-density fields ===== */
+function pd(){return {theme:getv('pdTheme'),light:getv('pdLight'),material:getv('pdMaterial'),aperture:getv('pdAperture'),iso:getv('pdISO'),shutter:getv('pdShutter')};}
+function camNums(){const p=pd();return [p.aperture,p.iso?'ISO '+p.iso:'',p.shutter].filter(Boolean).join(', ');}
+/* realism / anti-AI-beautification */
+function realProseEN(){const r=S.real,a=[];
+  if(r.natural)a.push('Render the face with natural realism and do not auto-beautify; avoid unnatural symmetry, exaggerated large eyes, or over-smoothed skin; keep subtle natural asymmetry, real skin texture, and a natural, slightly imperfect expression.');
+  if(r.deai&&isPhoto())a.push('It must look like a real photograph — not CG, not a 3D render, not anime; no artificial HDR or harsh studio flash; natural hair flow and natural light.');
+  if(r.grain&&isPhoto())a.push('Include subtle, fine film grain.');
+  return a.join(' ');}
+function realProseJP(){const r=S.real,a=[];
+  if(r.natural)a.push('顔は自然な実在感を最優先し自動美化はしない。不自然な左右対称・極端な目の拡大・つるつるの肌補正を避け、わずかな左右非対称と自然な素肌感、自然で少し崩れのある表情を保つ。');
+  if(r.deai&&isPhoto())a.push('実写写真のように見せ、CG・3D・アニメ調にしない。人工的なHDRや強いフラッシュを避け、自然な毛流れと自然光で。');
+  if(r.grain&&isPhoto())a.push('微細なフィルムグレインを加える。');
+  return a.join('');}
+function realPosTags(){const r=S.real,a=[];if(r.natural)a.push('natural skin texture','realistic skin','slight asymmetry');if(r.grain&&isPhoto())a.push('film grain');return a.join(', ');}
+function realNegTags(){const r=S.real,a=[];if(r.natural)a.push('airbrushed','plastic skin','over-smooth skin','exaggerated symmetry','perfectly symmetrical face','huge eyes','doll-like','beauty filter');if(r.deai&&isPhoto())a.push('cgi','3d render','artificial hdr','studio flash glare');return a.join(', ');}
+/* SFW composition/context prohibition (always on) */
+function prohibitContextJP(){return (PACK.prohibitJP?PACK.prohibitJP():'');}
+function prohibitContextEN(){return (PACK.prohibitEN?PACK.prohibitEN():'');}
+
+/* ===== persistent storage (works in downloaded file; memory fallback in sandbox) ===== */
+const STORE=(function(){let mem={},ok=false;try{localStorage.setItem('__psp','1');localStorage.removeItem('__psp');ok=true;}catch(e){ok=false;}
+  return {available:ok,get(k){try{return ok?localStorage.getItem(k):(k in mem?mem[k]:null);}catch(e){return (k in mem?mem[k]:null);}},set(k,v){try{ok?localStorage.setItem(k,v):(mem[k]=v);}catch(e){mem[k]=v;}}};})();
+const FAVK='psp_v1_favorites',HISTK='psp_v1_history';
+function getJSON(k,def){try{const v=STORE.get(k);return v?JSON.parse(v):def;}catch(e){return def;}}
+function setJSON(k,o){STORE.set(k,JSON.stringify(o));}
+function saveFav(){let name='';try{name=prompt('お気に入りの名前：','');}catch(e){name='お気に入り';}if(name===null)return;if(!name)name='無題';const f=getJSON(FAVK,[]);f.unshift({name:name,state:collectState()});setJSON(FAVK,f.slice(0,50));renderFavs();}
+function delFav(i){const f=getJSON(FAVK,[]);f.splice(i,1);setJSON(FAVK,f);renderFavs();}
+function applyFav(i){const f=getJSON(FAVK,[]);if(f[i]){pushUndo();try{loadState(JSON.parse(f[i].state));}catch(e){}}}
+function renderFavs(){const host=document.getElementById('favList');if(!host)return;const f=getJSON(FAVK,[]);host.innerHTML='';if(!f.length){host.innerHTML='<div class="hint">保存したお気に入りがここに並びます。</div>';return;}f.forEach((it,i)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;';const b=document.createElement('button');b.className='btn btn-ghost';b.style.cssText='flex:1;justify-content:flex-start;';b.textContent='⭐ '+it.name;b.onclick=()=>applyFav(i);const d=document.createElement('button');d.className='btn btn-ghost';d.style.cssText='flex:0 0 auto;';d.textContent='🗑';d.onclick=()=>delFav(i);row.appendChild(b);row.appendChild(d);host.appendChild(row);});}
+function pushHistory(model,pos){if(!pos)return;const h=getJSON(HISTK,[]);h.unshift({model:model,pos:pos.slice(0,400)});setJSON(HISTK,h.slice(0,20));renderHistory();}
+function clearHistory(){setJSON(HISTK,[]);renderHistory();}
+function renderHistory(){const host=document.getElementById('histList');if(!host)return;const h=getJSON(HISTK,[]);host.innerHTML='';if(!h.length){host.innerHTML='<div class="hint">コピーした内容がここに残ります。</div>';return;}h.forEach(it=>{const d=document.createElement('div');d.style.cssText='font-size:11px;color:#666;border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-bottom:5px;';d.textContent='['+it.model+'] '+it.pos.slice(0,90)+(it.pos.length>90?'…':'');host.appendChild(d);});}
+
+/* ===== emphasis (weighting) for tag models ===== */
+const EMPHSTEPS=[1,1.1,1.2,1.3];
+function emphWrap(tag,w,v){if(!w||w<=1)return tag;if(v==='nai')return w>=1.3?'{{{'+tag+'}}}':(w>=1.2?'{{'+tag+'}}':'{'+tag+'}');return '('+tag+':'+w+')';}
+function renderEmph(){const host=document.getElementById('emphList');if(!host)return;Object.keys(S.emph).forEach(id=>{if(!S.sel.has(id))delete S.emph[id];});host.innerHTML='';const ids=[...S.sel].filter(id=>OPT[id]&&OPT[id].tag);if(!ids.length){host.innerHTML='<div class="hint">要素を選ぶとここに表示されます（タップで強度を切替）。</div>';return;}ids.forEach(id=>{const w=S.emph[id]||1;const b=document.createElement('button');b.className='toggle'+(w>1?' on':'');b.textContent=OPT[id].label+(w>1?' ×'+w:'');b.onclick=()=>{const cur=S.emph[id]||1;let i=(EMPHSTEPS.indexOf(cur)+1)%EMPHSTEPS.length;const nv=EMPHSTEPS[i];if(nv<=1)delete S.emph[id];else S.emph[id]=nv;render();};host.appendChild(b);});}
+
+/* ===== extra copy formats ===== */
+const VERSION='1.0';
+const A1111S={pony:'Euler a|7|28',illust:'Euler a|5.5|28',noob:'Euler a|5|28',animagine:'Euler a|5.5|26',sdxl:'DPM++ 2M Karras|7|30',sd15:'DPM++ 2M Karras|7|28',nai:'Euler Ancestral|5|28'};
+function buildA1111(modelId){const m=MODELS.find(x=>x.id===modelId);const r=build(modelId);if(m.fam!=='tag')return r.pos;const c=(A1111S[m.variant]||'Euler a|7|28').split('|');const res=((m.variant==='sd15'?RES512:RES1024)[S.aspect]||'').replace('×','x');const seed=getv('seed')||'-1';return r.pos+'\nNegative prompt: '+r.neg+'\nSteps: '+c[2]+', Sampler: '+c[0]+', CFG scale: '+c[1]+', Seed: '+seed+(res?', Size: '+res:'');}
+function buildJSON(modelId){const m=MODELS.find(x=>x.id===modelId);const r=build(modelId);syncSel();const obj={tool:'Prompt Studio PRO',version:VERSION,model:m.name,model_id:m.id,language:S.lang,format:(S.proseStyle===1?'structured':'prose'),medium:S.medium,aspect:S.aspect,prompt:r.pos};if(m.neg===true)obj.negative=r.neg;obj.recommended_settings=m.set;obj.selections=[...S.sel];return JSON.stringify(obj,null,2);}
+async function copyA1111(){const ok=await doCopy(buildA1111(S.model));flash(document.getElementById('btnA1111'),ok?'✅ A1111形式をコピー':'⚠ 手動でコピー');}
+async function copyJSON(){const ok=await doCopy(buildJSON(S.model));flash(document.getElementById('btnJSON'),ok?'✅ JSONをコピー':'⚠ 手動でコピー');}
+
+const REALT=[{id:'natural',label:'自然性・実在感'},{id:'deai',label:'AI感除去'},{id:'grain',label:'フィルムグレイン'}];
+function buildRealToggles(){const host=document.getElementById('realToggles');if(!host)return;REALT.forEach(t=>{const lab=el('label','toggle');const inp=el('input');inp.type='checkbox';inp.dataset.real=t.id;inp.onchange=()=>{S.real[t.id]=inp.checked;lab.classList.toggle('on',inp.checked);render();};lab.appendChild(inp);lab.appendChild(document.createTextNode(' '+t.label));host.appendChild(lab);});}
+
+/* ===== INIT ===== */
+function quickAspect(a){S.aspect=a;ASPECTS.forEach(x=>setChk('aspect_'+x.id,x.id===a));render();}
+function setNegPreset(t){const e=document.getElementById('customNeg');if(e){e.value=(e.value&&e.value.trim()&&!e.value.includes(t))?e.value.replace(/,\s*$/,'')+', '+t:t;}render();}
+function genVariations(){
+  const varyCats=['expr','gaze','pose','comp','light','mood','time'];
+  const snap={};
+  varyCats.forEach(k=>{const cat=PACK.cats.find(c=>c.key===k);if(!cat)return;snap[k]=cat.opts.filter(o=>{const i=document.getElementById('in_'+o.id);return i&&i.checked;}).map(o=>o.id);});
+  const results=[];
+  for(let n=0;n<4;n++){
+    varyCats.forEach(k=>{const cat=PACK.cats.find(c=>c.key===k);if(!cat||S.locked.has(k))return;
+      cat.opts.forEach(o=>{const i=document.getElementById('in_'+o.id);if(i)i.checked=false;});
+      const pick=cat.mode==='single'?1:(1+Math.floor(Math.random()*2));
+      [...cat.opts].sort(()=>Math.random()-0.5).slice(0,pick).forEach(o=>{const i=document.getElementById('in_'+o.id);if(i)i.checked=true;});
+    });
+    syncSel();
+    const r=build(S.model);
+    results.push('【案'+(n+1)+'】\n'+r.pos+(r.neg?'\n[除外] '+r.neg:''));
+  }
+  varyCats.forEach(k=>{const cat=PACK.cats.find(c=>c.key===k);if(!cat||snap[k]===undefined)return;cat.opts.forEach(o=>{const i=document.getElementById('in_'+o.id);if(i)i.checked=snap[k].includes(o.id);});});
+  syncSel();render();
+  const out=document.getElementById('varOut');if(out)out.value=results.join('\n\n──────────\n\n');
+  const w=document.getElementById('varWrap');if(w)w.open=true;
+}
+
+function lenMeta(r,m){
+  const pos=r.pos||'',chars=pos.length;
+  if(m.fam==='tag'){
+    const tags=pos.split(',').map(s=>s.trim()).filter(Boolean).length;
+    const warn=tags>45?'⚠ タグ過多：各要素が薄まり効きが落ちる恐れ。重要要素に絞るか、強度(×)で優先付けを。':(tags>32?'やや多め：主役級は強度(×)で持ち上げると安定。':'適量です。');
+    return 'タグ数 約'+tags+'　/　文字数 '+chars+'　— '+warn;
+  }
+  const tokens=Math.round(chars/4);
+  const warn=chars>1400?'⚠ かなり長め：要点が薄まることがあります。装飾を減らすと指示が通りやすくなります。':(chars>900?'やや長め：自然文モデルには十分な情報量です。':'適量です。');
+  return '文字数 '+chars+'　/　目安トークン 約'+tokens+'　— '+warn;
+}
+function b64e(s){try{return btoa(unescape(encodeURIComponent(s)));}catch(e){return'';}}
+function b64d(s){try{return decodeURIComponent(escape(atob(s)));}catch(e){return'';}}
+function exportCode(){const code='PSP1:'+b64e(collectState());const ta=document.getElementById('codeBox');if(ta){ta.value=code;try{ta.select();}catch(e){}}doCopy(code);const b=document.getElementById('btnExport');if(b)flash(b,'✅ コピーしました');}
+function importCode(){let t=getv('codeBox');if(!t){try{t=prompt('設定コードを貼り付けてください：','')||'';}catch(e){t='';}}t=t.trim().replace(/^PSP1:/,'');if(!t)return;const json=b64d(t);if(!json){try{alert('コードを読み取れませんでした。');}catch(e){}return;}pushUndo();try{loadState(JSON.parse(json));const b=document.getElementById('btnImport');if(b)flash(b,'✅ 読み込みました');}catch(e){try{alert('コードが不正です。');}catch(_){}}}
+function applyTheme(){const dark=STORE.get('psp_theme')==='dark';document.body.classList.toggle('dark',dark);const b=document.getElementById('btnDark');if(b)b.textContent=dark?'☀ ライト':'🌙 ダーク';}
+function toggleDark(){const on=!document.body.classList.contains('dark');STORE.set('psp_theme',on?'dark':'light');applyTheme();}
+function renderSelSummary(){const host=document.getElementById('selSummary');if(!host)return;const ids=[...S.sel];host.innerHTML='';if(!ids.length){host.innerHTML='<span class="hint">まだ何も選択していません。下のグループから選んでください。</span>';const c0=document.getElementById('selCount');if(c0)c0.textContent='';return;}let n=0;ids.forEach(id=>{const o=OPT[id];if(!o)return;n++;const chip=document.createElement('button');chip.className='selchip';chip.innerHTML=o.label+' <b>×</b>';chip.title='クリックで解除';chip.onclick=()=>{setChecked(id,false);syncSel();render();};host.appendChild(chip);});const c=document.getElementById('selCount');if(c)c.textContent=n?'（'+n+'件）':'';}
+function setAllGroups(open){document.querySelectorAll('#catGroups details.grp').forEach(d=>{d.open=open;});}
+/* ===== undo ===== */
+let UNDO=[];
+function pushUndo(){try{UNDO.push(collectState());if(UNDO.length>30)UNDO.shift();}catch(e){}updateUndoBtn();}
+function undo(){if(!UNDO.length)return;const s=UNDO.pop();try{loadState(JSON.parse(s));}catch(e){}updateUndoBtn();}
+function updateUndoBtn(){const b=document.getElementById('btnUndo');if(b){const on=UNDO.length>0;b.disabled=!on;b.style.opacity=on?'1':'.45';b.textContent='↩ 元に戻す'+(on?'（'+UNDO.length+'）':'');}}
+
+/* ===== theme gacha (auto-generated from this pack's presets) ===== */
+const SHOTCATS=['expr','gaze','pose','interaction','comp','lens','light','mood','bg','season','situation','time'];
+function rollCats(keys){keys.forEach(k=>{const cat=PACK.cats.find(c=>c.key===k);if(!cat||S.locked.has(k))return;cat.opts.forEach(o=>setChecked(o.id,false));const pick=cat.mode==='single'?1:(1+Math.floor(Math.random()*2));[...cat.opts].sort(()=>Math.random()-.5).slice(0,pick).forEach(o=>setChecked(o.id,true));});}
+function themeGachaByIndex(i){if(i<0||i>=PACK.presets.length)return;pushUndo();applyPresetCore(i);rollCats(['expr','gaze','pose','comp','light','bg','mood','time']);syncSel();render();}
+function shotReshuffle(){pushUndo();rollCats(SHOTCATS);syncSel();render();}
+function buildThemeGacha(){
+  const host=document.getElementById('themeGacha');if(!host)return;host.innerHTML='';
+  const mk=(label,title,fn)=>{const b=document.createElement('button');b.className='btn btn-ghost btn-sm';b.textContent=label;if(title)b.title=title;b.onclick=fn;host.appendChild(b);};
+  mk('🎲 ショットだけ（人物固定）','人物はそのまま、ポーズ・表情・背景・光・季節などだけ変えます',shotReshuffle);
+  mk('🎲 おまかせテーマ','ランダムなテーマで一発生成',()=>themeGachaByIndex(Math.floor(Math.random()*PACK.presets.length)));
+  PACK.presets.forEach((p,i)=>mk('🎲 '+p.label.replace(/^[^\s]+\s+/,''),'このテーマをベースにショットをランダム',()=>themeGachaByIndex(i)));
+}
+
+function init(){
+  setBranding();
+  buildModels();
+  buildChips('mediumChips',MEDIA,'medium',m=>m.id,m=>m.label,id=>S.medium=id,S.medium);
+  buildChips('aspectChips',ASPECTS,'aspect',a=>a.id,a=>a.label,id=>S.aspect=id,S.aspect);
+  buildChips('langChips',[{id:'en',label:'🌐 自然文：English'},{id:'jp',label:'🗾 自然文：日本語'}],'lang',x=>x.id,x=>x.label,id=>S.lang=id,S.lang);
+  buildPresets();buildCats();buildFixToggles();buildRealToggles();buildSheetToggles();
+  buildSeg('qSeg',['控えめ','標準','高','最大'],'qLevel');
+  buildSeg('proseSeg',['簡潔','標準','シネマ'],'prose');
+  buildSeg('negSeg',['軽め','標準','強力'],'neg');
+  buildSeg('intSeg',['控えめ','標準','強め'],'intensity');
+  buildSeg('peopleSeg',['ソロ','二人','三人','集団','カップル'],'people');
+  buildSeg('styleSeg',['文章','構造化（見出し付き）'],'proseStyle');
+  renderFavs();renderHistory();buildThemeGacha();applyTheme();updateUndoBtn();
+  const sn=document.getElementById('storeNote');if(sn)sn.textContent=STORE.available?'お気に入り・履歴はこの端末（ブラウザ）に保存されます。':'※この表示環境では保存は一時的です。ダウンロードしたHTMLでは端末に永続保存されます。';
+  applyPreset(0);
+}
+function boot(){try{init();}catch(e){showErr((e&&e.message)?e.message:String(e));}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+</script>
+</body>
+</html>
